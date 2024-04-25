@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 const KeepWebsiteAlive = () => {
   useEffect(() => {
     // URL of the spun-down website
-    const websiteUrl = "https://l-u-n-a-codex.onrender.com";
+    const websiteUrl = "https://hire-vue.onrender.com/";
 
     // Function to make a GET request to the website URL
     const pingWebsite = () => {

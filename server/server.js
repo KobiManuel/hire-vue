@@ -29,7 +29,7 @@ app.get("/", (req, res) => {
 });
 
 // Start an interview session
-app.post("/interview/start", (req, res) => {
+app.post("/", (req, res) => {
   const sessionId = Date.now().toString(); // Simple unique session ID
   sessions[sessionId] = { index: 0, responses: [] }; // Initialize session
 
@@ -37,7 +37,7 @@ app.post("/interview/start", (req, res) => {
 });
 
 // Handle responses and manage interview flow
-app.post("/interview/response", async (req, res) => {
+app.post("/", async (req, res) => {
   const { sessionId, userResponse } = req.body;
 
   if (!sessions[sessionId]) {
