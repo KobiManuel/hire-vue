@@ -184,7 +184,7 @@ const ChatComponent = () => {
         const parsedData = data.bot.trim();
         messageDiv.innerHTML = "";
         typedText(document.getElementById(uniqueId), parsedData);
-        localStorage.setItem("hasReceivedValidResponse", "true");
+        // localStorage.setItem("hasReceivedValidResponse", "true");
       } else {
         if (response.status === 429) {
           messageDiv.innerHTML =

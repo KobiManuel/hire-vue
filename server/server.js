@@ -12,46 +12,70 @@ const openai = new OpenAI({
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.get("/", async (req, res) => {
+
+let questions = [
+  "Can you describe a challenging project you have worked on?",
+  "How do you manage tight deadlines?",
+  "What motivates you to work?",
+];
+
+// In-memory session storage
+let sessions = {};
+
+app.get("/", (req, res) => {
   res.status(200).send({
-    message: "I am L.U.N.A . Your Language Understanding Neural Assistant",
+    message: "I am HireVue. The best ever A.I Interviewer",
   });
 });
-app.post("/", async (req, res) => {
-  try {
-    const prompt = req.body.prompt;
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are L.U.N.A(Language Understanding Neural Assistant) a helpful assistant. Answer all questions and provide help",
-        },
-        {
-          role: "assistant",
-          content:
-            "Hello! I am a chatbot built by Kobi. How can i help you today?",
-        },
-        { role: "user", content: prompt },
-      ],
-      temperature: 0,
-      max_tokens: 400,
-      top_p: 1,
-      frequency_penalty: 0.5,
-      presence_penalty: 0,
-    });
+// Start an interview session
+app.post("/interview/start", (req, res) => {
+  const sessionId = Date.now().toString(); // Simple unique session ID
+  sessions[sessionId] = { index: 0, responses: [] }; // Initialize session
 
-    res.status(200).send({
-      bot: response.choices[0].message.content,
+  res.json({ message: "Interview started.", sessionId: sessionId });
+});
+
+// Handle responses and manage interview flow
+app.post("/interview/response", async (req, res) => {
+  const { sessionId, userResponse } = req.body;
+
+  if (!sessions[sessionId]) {
+    return res.status(404).json({ message: "Session not found." });
+  }
+
+  let session = sessions[sessionId];
+  let currentQuestion = questions[session.index];
+
+  const response = await openai.chat.completions.create({
+    model: "gpt-3.5-turbo",
+    messages: [
+      { role: "system", content: "You are conducting an interview." },
+      { role: "user", content: userResponse },
+    ],
+    temperature: 0.5,
+    max_tokens: 150,
+  });
+
+  // Check for continuation or follow-up logic here
+  session.responses.push({
+    question: currentQuestion,
+    answer: response.choices[0].message.content,
+  });
+
+  if (session.index < questions.length - 1) {
+    session.index += 1;
+    currentQuestion = questions[session.index];
+    res.json({
+      question: currentQuestion,
+      assistantResponse: response.choices[0].message.content,
     });
-  } catch (error) {
-    console.log(error);
-    res.status(500).send({ error });
+  } else {
+    delete sessions[sessionId]; // Clean up session
+    res.json({ message: "Interview completed.", responses: session.responses });
   }
 });
 
 app.listen(5000, () =>
-  console.log("server is running on port http://localhost:5000")
+  console.log("Server is running on http://localhost:5000")
 );

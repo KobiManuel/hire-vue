@@ -1,10 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router";
 import styles from "./MainPage.module.scss";
 import Header from "../Header/Header";
-import KeepWebsiteAlive from "../KeepWebsiteAlive";
 
 const MainPage = () => {
+  const navigate = useNavigate();
   return (
     <main className={styles.main}>
       <Header />
@@ -16,7 +16,7 @@ const MainPage = () => {
 
         <p>Interview 100x more candidates at once using AI</p>
         <div className="btn-lower">
-          <button>Book a demo</button>
+          <button onClick={() => navigate("/chat")}>Start Interview</button>
           <p>
             Are you a recruiter? Check out <i>Interview Prep</i>
           </p>
@@ -32,6 +32,15 @@ const MainPage = () => {
         </div>
       </header>
       <figure className={styles.video}>
+        <div className={styles["bg-grid-left"]}>
+          <img
+            src="https://assets-global.website-files.com/65fb502f8371aab95edce0e0/65fb502f8371aab95edce9f8_grid-main.svg"
+            loading="lazy"
+            alt=""
+            class="bg-grid_img"
+          />
+          <div class="bg-grid_gradient"></div>
+        </div>
         <div className={styles["line"]}></div>
         <div className={styles["line"]}></div>
         <div className={styles["line"]}></div>

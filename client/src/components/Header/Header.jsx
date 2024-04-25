@@ -27,7 +27,7 @@ const Header = () => {
         </figure>
         <div>
           {" "}
-          <button>Book a demo</button>
+          <button>Start Interview</button>
           <a
             href="https://docs.google.com/document/d/1NJ8nqD9KPumsMaPehvlMv-WAMziW7qhoPugzdUBL4L0/edit?usp=sharing"
             target="_blank"
