@@ -9,7 +9,7 @@
 
 .chat-container-body {
   width: 100%;
-  background-color: rgba(204, 239, 247, 0.123);
+  background-color: #050505;
 }
 
 #app {
@@ -39,6 +39,7 @@
   padding-bottom: 20px;
   scroll-behavior: smooth;
   margin-bottom: 60px;
+  background: #050505;
 }
 
 /* hides scrollbar */
@@ -53,7 +54,7 @@
 }
 
 .ai {
-  background: #d3e3fd;
+  background: #3444da;
   /* border-top: 1px solid #0022401d;
   border-bottom: 1px solid #0022401d; */
 }
@@ -67,6 +68,9 @@
   flex-direction: row;
   gap: 30px;
   padding-right: 45px;
+  @media screen and (max-width: 900px) {
+    gap: 12px;
+  }
 }
 
 .profile {
@@ -95,6 +99,10 @@
 
 .ai .profile {
   background: #041e49;
+  background-image: url(../../assets/avatar.avif);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
 }
 
 .profile img {
@@ -108,7 +116,7 @@
 .message {
   flex: 1;
 
-  color: #002240;
+  color: white;
   font-size: 15px;
   line-height: 32px;
 
@@ -311,7 +319,7 @@ form img {
   align-items: center;
   gap: 30px;
   margin-top: 50px;
-  color: #002240;
+  color: white;
   padding-right: 45px;
 }
 #typing-text.hidden {
