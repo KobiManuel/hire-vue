@@ -48,20 +48,23 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
-  width: 45%;
+  width: 80%;
   .label {
     font-weight: 300;
     line-height: 1.2;
     font-size: 1.1rem;
+    text-align: center;
   }
   .header {
     font-size: 3.8rem;
     font-weight: 700;
     text-transform: uppercase;
+    text-align: center;
   }
   .desc {
     font-weight: 400;
     font-size: 1.2rem;
+    text-align: center;
   }
   .name-input {
     border: none;
@@ -72,6 +75,20 @@
     height: 40px;
     padding: 8px;
     font-size: 0.8rem;
+  }
+
+  .textarea {
+    border: none;
+    outline: none;
+    width: 100%;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 8px;
+    border: 1px solid #4c9ce252;
+    min-height: 340px;
+    padding: 8px;
+    font-size: 0.8rem;
+    resize: none;
   }
   .error-msg {
     position: absolute;
