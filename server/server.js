@@ -19,20 +19,21 @@ app.get("/", async (req, res) => {
   });
 });
 
-const dummyInterviewQuestions = [
+const interviewQuestions = [
   "Hello! Are you ready to start your interview?",
   "Can you tell me a bit about yourself and your background?",
   "Why are you interested in this position?",
   "Describe a time you faced a challenge and how you overcame it.",
 ];
 
-let interviewQuestions = [];
+let newInterviewQuestions = [];
 
 app.post("/interview-questions", async (req, res) => {
   try {
-    interviewQuestions = req.body.questions || dummyInterviewQuestions;
+    newInterviewQuestions = req.body.questions;
     console.log("this is", req.body.questions);
     res.status(200).send({ message: "Questions updated successfully" });
+    console.log("questions", interviewQuestions);
   } catch (error) {
     console.error("Failed to update questions:", error);
     res.status(500).send({ error });
@@ -48,8 +49,6 @@ const conversationHistory = [
 ];
 
 app.post("/", async (req, res) => {
-  console.log("this", interviewQuestions);
-
   try {
     const prompt = req.body.prompt;
 
