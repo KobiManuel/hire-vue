@@ -62,7 +62,7 @@ app.post("/", async (req, res) => {
     const response = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: [
-        { role: "system", content: "You are conducting an interview" },
+        { role: "system", content: assistantContent },
         { role: "assistant", content: assistantContent },
         { role: "user", content: prompt }, // User response (greeting or answer)
       ],
