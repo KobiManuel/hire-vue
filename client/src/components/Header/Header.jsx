@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import bot from "../../assets/lunabot1.png";
 import "./Header.scss";
 import AdminModal from "../Modal/AdminModal";
+import MenuIcon from "../MenuIcon/MenuIcon";
 
 const Header = () => {
   const [showModal, setShowModal] = useState(false);
@@ -45,6 +46,7 @@ const Header = () => {
               Admin
             </a>
           </div>
+          <MenuIcon />
         </nav>
       </header>
     </>
