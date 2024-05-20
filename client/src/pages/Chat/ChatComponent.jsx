@@ -3,10 +3,10 @@ import bot from "../../assets/lunabot1.png";
 import user from "../../assets/user.png";
 import send from "../../assets/send.png";
 import "./ChatComponent.scss";
-import CopyIcon from "../Icons/CopyIcon";
-import CheckCircle from "../Icons/CheckCircle";
-import Header from "../Header/Header";
-import KeepWebsiteAlive from "../KeepWebsiteAlive";
+import CopyIcon from "../../components/Icons/CopyIcon";
+import CheckCircle from "../../components/Icons/CheckCircle";
+import Header from "../../components/Header/Header";
+import KeepWebsiteAlive from "../../components/KeepWebsiteAlive";
 
 const ChatComponent = () => {
   const [chatMessages, setChatMessages] = useState([]);
@@ -345,6 +345,7 @@ const ChatComponent = () => {
             onSubmit={handleSubmit}
             onInput={autoResize}
             ref={formRef}
+            className="form"
           >
             <textarea
               name="prompt"

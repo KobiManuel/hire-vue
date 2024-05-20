@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import styles from "./Modal.module.scss";
 import { useNavigate } from "react-router-dom";
 
-const Modal = () => {
+const Modal = ({ showModal, setShowModal }) => {
   const [error, setError] = useState(false);
 
   const inputRef = useRef(null);
@@ -44,55 +44,66 @@ const Modal = () => {
       navigate("/chat");
     }
   };
-  return (
-    <div className={styles["helper-modal-container"]}>
-      <div className={styles["helper-modal-overlay"]}></div>
+  if (!showModal) {
+    return null;
+  } else
+    return (
       <div
-        style={{
-          width: "50%",
-          margin: "auto",
-          zIndex: 1000,
-          position: "relative",
-        }}
-        className={styles["modal-main"]}
+        className={styles["helper-modal-container"]}
+        onClick={() => setShowModal(false)}
       >
-        <div className={styles["helper-modal"]}>
-          <div className={styles.right}>
-            <label className={styles.label}> AI Interview Assistant</label>
-            <h2 className={styles.header}>HIRE VUE</h2>
+        <div className={styles["helper-modal-overlay"]}></div>
+        <div
+          style={{
+            width: "50%",
+            margin: "auto",
+            zIndex: 1000,
+            position: "relative",
+          }}
+          className={styles["modal-main"]}
+        >
+          <div
+            className={styles["helper-modal"]}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={styles.right}>
+              <label className={styles.label}> AI Interview Assistant</label>
+              <h2 className={styles.header}>HIRE VUE</h2>
 
-            <p className={styles.desc}>Please Enter your name to get started</p>
-            <div style={{ position: "relative", width: "100%" }}>
-              <input
-                placeholder="e.g. Elon Musk"
-                className={styles["name-input"]}
-                onChange={handleTextInput}
-                ref={inputRef}
-              />
-              {error ? (
-                <span className={styles["error-msg"]}>
-                  Input should contain two names
-                </span>
-              ) : (
-                ""
-              )}
+              <p className={styles.desc}>
+                Please Enter your name to get started
+              </p>
+              <div style={{ position: "relative", width: "100%" }}>
+                <input
+                  placeholder="e.g. Elon Musk"
+                  className={styles["name-input"]}
+                  onChange={handleTextInput}
+                  ref={inputRef}
+                />
+                {error ? (
+                  <span className={styles["error-msg"]}>
+                    Input should contain two names
+                  </span>
+                ) : (
+                  ""
+                )}
+              </div>
+
+              <button
+                className={styles["get-started-btn"]}
+                onClick={handleGetStarted}
+              >
+                Get Started
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+              </button>
             </div>
-
-            <button
-              className={styles["get-started-btn"]}
-              onClick={handleGetStarted}
-            >
-              Get Started
-              <span></span>
-              <span></span>
-              <span></span>
-              <span></span>
-            </button>
           </div>
-        </div>
-      </div>{" "}
-    </div>
-  );
+        </div>{" "}
+      </div>
+    );
 };
 
 export default Modal;

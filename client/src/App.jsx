@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import "./App.css";
-import MainPage from "./components/MainPage/MainPage";
-import ChatComponent from "./components/Chat/ChatComponent";
+import MainPage from "./pages/MainPage/MainPage";
+import ChatComponent from "./pages/Chat/ChatComponent";
+import SignUp from "./pages/SignUp/Main";
 
 function App() {
   const [count, setCount] = useState(0);
@@ -12,6 +13,7 @@ function App() {
       <Routes>
         <Route path="/" element={<MainPage />} />
         <Route path="chat" element={<ChatComponent />} />
+        <Route path="signup" element={<SignUp />} />
       </Routes>
     </>
   );

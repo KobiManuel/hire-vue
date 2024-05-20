@@ -4,6 +4,7 @@ import bot from "../../assets/lunabot1.png";
 import "./Header.scss";
 import AdminModal from "../Modal/AdminModal";
 import MenuIcon from "../MenuIcon/MenuIcon";
+import Modal from "../Modal/Modal";
 
 const Header = () => {
   const [showModal, setShowModal] = useState(false);
@@ -11,10 +12,12 @@ const Header = () => {
 
   if (showModal) {
     document.body.style.overflow = "hidden";
+  } else {
+    document.body.style.overflow = "auto";
   }
   return (
     <>
-      {showModal && <AdminModal setShowModal={setShowModal} />}
+      {showModal && <Modal setShowModal={setShowModal} showModal={showModal} />}
       <header className={`header ${displayNav && "navOpen"}`}>
         <nav>
           <figure>
@@ -37,19 +40,10 @@ const Header = () => {
           </figure>
           <div>
             {" "}
-            <button>Start Interview</button>
-            <a
-              href=""
-              target="_blank"
-              rel="noreferrer"
-              className="resume"
-              onClick={(e) => {
-                e.preventDefault();
-                setShowModal(true);
-              }}
-            >
+            <button onClick={() => setShowModal(true)}>Start Interview</button>
+            <Link to={"/signup"} className="resume">
               Admin
-            </a>
+            </Link>
           </div>
           <MenuIcon handleMenuToggle={() => setDisplayNav(!displayNav)} />
           {displayNav && (
@@ -62,7 +56,7 @@ const Header = () => {
                   <Link to={"/"}>How it Works</Link>
                 </li>
                 <li>
-                  <Link to={"/"}>Admin</Link>
+                  <Link to={"/signup"}>Admin</Link>
                 </li>
               </ul>
               <ul className="mobile-nav__right">
@@ -74,7 +68,17 @@ const Header = () => {
                   ></a>
                 </li>
                 <li>
-                  <Link to={"/"}>Start Interview</Link>
+                  <a
+                    href=""
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setShowModal(true);
+                    }}
+                  >
+                    Start Interview
+                  </a>
                 </li>
               </ul>
             </div>

@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import styles from "./MainPage.module.scss";
-import Header from "../Header/Header";
-import Modal from "../Modal/Modal";
+import Header from "../../components/Header/Header";
+import Modal from "../../components/Modal/Modal";
 
 const MainPage = () => {
   const navigate = useNavigate();
@@ -10,10 +10,12 @@ const MainPage = () => {
 
   if (showModal) {
     document.body.style.overflow = "hidden";
+  } else {
+    document.body.style.overflow = "auto";
   }
   return (
     <>
-      {showModal && <Modal />}
+      {showModal && <Modal showModal={showModal} setShowModal={setShowModal} />}
       <main className={styles.main}>
         <Header />
         <header className={styles["hero"]}>
