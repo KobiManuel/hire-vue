@@ -7,10 +7,11 @@ import MenuIcon from "../MenuIcon/MenuIcon";
 
 const Header = () => {
   const [showModal, setShowModal] = useState(false);
+  const [displayNav, setDisplayNav] = useState(false);
   return (
     <>
       {showModal && <AdminModal setShowModal={setShowModal} />}
-      <header className="header">
+      <header className={`header ${displayNav && "navOpen"}`}>
         <nav>
           <figure>
             <Link to="/" className="name-container">
@@ -46,7 +47,34 @@ const Header = () => {
               Admin
             </a>
           </div>
-          <MenuIcon />
+          <MenuIcon handleMenuToggle={() => setDisplayNav(!displayNav)} />
+          {displayNav && (
+            <div className="mobile-nav">
+              <ul className="mobile-nav__left">
+                <li>
+                  <Link to={"/"}>Vetting Process</Link>
+                </li>
+                <li>
+                  <Link to={"/"}>How it Works</Link>
+                </li>
+                <li>
+                  <Link to={"/"}>Admin</Link>
+                </li>
+              </ul>
+              <ul className="mobile-nav__right">
+                <li>
+                  <a
+                    href="https://trysapa.tawk.help/"
+                    target="_blank"
+                    rel="noreferrer"
+                  ></a>
+                </li>
+                <li>
+                  <Link to={"/"}>Start Interview</Link>
+                </li>
+              </ul>
+            </div>
+          )}
         </nav>
       </header>
     </>

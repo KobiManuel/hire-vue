@@ -60,7 +60,7 @@ $distance: -1px;
     padding: 1.25rem;
     display: flex;
     margin-top: 100px;
-    z-index: 1000000;
+    z-index: 10;
     > .bg-grid-left {
       position: absolute;
       top: -40%;
@@ -174,7 +174,7 @@ $distance: -1px;
     align-items: center;
     gap: 2rem;
     margin-top: 180px;
-    z-index: 1000000;
+    z-index: 10;
     @media screen and (max-width: 800px) {
       width: 90%;
       margin-top: 100px;

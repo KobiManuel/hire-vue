@@ -10,6 +10,25 @@
   border-bottom: 1px solid rgba(141, 165, 252, 0.14);
   padding-bottom: 20px;
   background-color: #050505;
+
+  &.navOpen {
+    background: white;
+
+    > nav {
+      justify-content: flex-end;
+    }
+
+    > nav figure {
+      display: none;
+    }
+    > nav span {
+      > button {
+        span {
+          background: #050505 !important;
+        }
+      }
+    }
+  }
 }
 
 nav {
@@ -131,35 +150,118 @@ nav div a svg:hover {
   height: 60%;
 }
 
-@media screen and (max-width: 560px) {
-  * {
-    cursor: default !important;
+.mobile-nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 32px;
+  position: fixed;
+  width: 100%;
+  height: 100vh;
+  background: white;
+  left: 0;
+  top: 56px;
+  z-index: 20000000000000000;
+  &__left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+    margin-top: -76px;
+    > img {
+      width: 108px;
+      height: 44px;
+      margin-right: 16px;
+    }
+    li {
+      text-decoration: none;
+      list-style-type: none;
+      > a {
+        text-decoration: none;
+        font-weight: 400;
+        font-size: 20px;
+        line-height: 25.2px;
+        color: #121020;
+        &:hover {
+          color: #3444da;
+        }
+      }
+    }
   }
-  nav {
-    padding: 0 30px !important;
-  }
-}
-
-@media screen and (max-width: 504px) {
-  .header-logo {
-    min-width: 24px !important;
-    width: 24px !important;
-    height: 24px !important;
-    border-radius: 60% !important;
-  }
-  .kobi {
-    font-size: 1rem !important;
-  }
-
-  nav div a svg {
-    width: 14px;
-    height: 14px !important;
-  }
-  nav div a {
-    font-size: 0.8rem !important;
-    height: 14px !important;
-    &:last-child {
-      height: fit-content !important;
+  &__right {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    flex-direction: column;
+    > li {
+      text-decoration: none;
+      list-style-type: none;
+      color: #9747ff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      > a {
+        text-decoration: none;
+        font-weight: 400;
+        font-size: 24px;
+        line-height: 25.2px;
+        &:hover {
+          color: #121020;
+        }
+      }
+      &:nth-child(2) {
+        width: fit-content;
+        height: 40px;
+        padding: 15px 24px;
+        background: #3444da;
+        color: white;
+        border-radius: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        &:hover {
+          background: #1f2343;
+        }
+        > a {
+          color: white;
+          font-size: 14px !important;
+        }
+      }
     }
   }
 }
+
+// @media screen and (max-width: 560px) {
+//   * {
+//     cursor: default !important;
+//   }
+//   nav {
+//     padding: 0 30px !important;
+//   }
+// }
+
+// @media screen and (max-width: 504px) {
+//   .header-logo {
+//     min-width: 24px !important;
+//     width: 24px !important;
+//     height: 24px !important;
+//     border-radius: 60% !important;
+//   }
+//   .kobi {
+//     font-size: 1rem !important;
+//   }
+
+//   nav div a svg {
+//     width: 14px;
+//     height: 14px !important;
+//   }
+//   nav div a {
+//     font-size: 0.8rem !important;
+//     height: 14px !important;
+//     &:last-child {
+//       height: fit-content !important;
+//     }
+//   }
+// }

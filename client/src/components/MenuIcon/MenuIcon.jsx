@@ -1,4 +1,3 @@
-"use client";
 import React, { useState } from "react";
 import styles from "./MenuIcon.module.scss";
 
@@ -9,7 +8,7 @@ const MenuIcon = ({ handleMenuToggle }) => {
     handleMenuToggle();
   };
   return (
-    <div className={styles.menuIcon}>
+    <span className={styles.menuIcon}>
       <button
         className={
           menuIsActive
@@ -22,7 +21,7 @@ const MenuIcon = ({ handleMenuToggle }) => {
         <span className={styles.menuBar}></span>
         <span className={styles.menuBar}></span>
       </button>
-    </div>
+    </span>
   );
 };
 
