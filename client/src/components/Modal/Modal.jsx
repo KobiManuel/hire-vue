@@ -50,12 +50,11 @@ const Modal = () => {
       <div
         style={{
           width: "50%",
-          margin: "0 auto",
-          paddingTop: 70,
-          paddingBottom: 100,
+          margin: "auto",
           zIndex: 1000,
           position: "relative",
         }}
+        className={styles["modal-main"]}
       >
         <div className={styles["helper-modal"]}>
           <div className={styles.right}>
@@ -63,7 +62,7 @@ const Modal = () => {
             <h2 className={styles.header}>HIRE VUE</h2>
 
             <p className={styles.desc}>Please Enter your name to get started</p>
-            <div style={{ position: "relative", width: "fit-content" }}>
+            <div style={{ position: "relative", width: "100%" }}>
               <input
                 placeholder="e.g. Elon Musk"
                 className={styles["name-input"]}

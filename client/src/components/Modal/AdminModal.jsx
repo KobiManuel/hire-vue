@@ -49,12 +49,15 @@ const AdminModal = ({ setShowModal }) => {
       <div
         style={{
           width: "50%",
-          margin: "0 auto",
-          paddingTop: 70,
-          paddingBottom: 100,
+          margin: "auto",
+          height: "100vh",
           zIndex: 1000,
           position: "relative",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
         }}
+        className={styles["modal-main"]}
       >
         <div className={styles["helper-modal"]}>
           <div className={styles.right}>

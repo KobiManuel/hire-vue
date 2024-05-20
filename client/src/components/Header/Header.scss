@@ -37,6 +37,9 @@ nav {
   align-items: center;
   width: 100%;
   padding: 0 50px;
+  @media screen and (max-width: 800px) {
+    padding: 0 20px;
+  }
   > figure {
     display: flex;
     align-items: center;
@@ -104,7 +107,7 @@ nav div a svg:hover {
   text-decoration: none;
   color: white;
   &:hover {
-    color: #3f8d8d94 !important;
+    color: #3444da !important;
   }
 }
 
@@ -129,7 +132,7 @@ nav div a svg:hover {
   }
 }
 .kobi:hover {
-  color: #3f8d8d94 !important;
+  color: #3444da !important;
 }
 
 .backward-svg {

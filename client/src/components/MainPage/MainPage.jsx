@@ -7,6 +7,10 @@ import Modal from "../Modal/Modal";
 const MainPage = () => {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
+
+  if (showModal) {
+    document.body.style.overflow = "hidden";
+  }
   return (
     <>
       {showModal && <Modal />}

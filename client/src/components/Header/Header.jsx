@@ -8,6 +8,10 @@ import MenuIcon from "../MenuIcon/MenuIcon";
 const Header = () => {
   const [showModal, setShowModal] = useState(false);
   const [displayNav, setDisplayNav] = useState(false);
+
+  if (showModal) {
+    document.body.style.overflow = "hidden";
+  }
   return (
     <>
       {showModal && <AdminModal setShowModal={setShowModal} />}
