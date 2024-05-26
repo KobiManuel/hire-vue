@@ -19,13 +19,6 @@ app.get("/", async (req, res) => {
   });
 });
 
-const interviewQuestions = [
-  "Hello! Are you ready to start your interview?",
-  "Can you tell me a bit about yourself and your background?",
-  "Why are you interested in this position?",
-  "Describe a time you faced a challenge and how you overcame it.",
-];
-
 let newInterviewQuestions = [];
 
 app.post("/interview-questions", async (req, res) => {

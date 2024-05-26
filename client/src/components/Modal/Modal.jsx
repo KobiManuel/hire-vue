@@ -10,7 +10,7 @@ const Modal = ({ showModal, setShowModal }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const userName = localStorage.getItem("lunaClient");
+    const userName = localStorage.getItem("hireVueClient");
     if (userName) {
       const [firstName, lastName] = userName.split(" ");
       if (inputRef.current) {
@@ -40,7 +40,7 @@ const Modal = ({ showModal, setShowModal }) => {
     }
 
     if (first && last) {
-      localStorage.setItem("lunaClient", value);
+      localStorage.setItem("hireVueClient", value);
       navigate("/chat");
     }
   };

@@ -32,7 +32,7 @@ const ChatComponent = () => {
       .join("");
   };
 
-  const userName = localStorage.getItem("lunaClient");
+  const userName = localStorage.getItem("hireVueClient");
 
   function typedText(element, text) {
     setIsProcessingResponse(true);
@@ -57,19 +57,6 @@ const ChatComponent = () => {
     return `id-${timeStamp}-${hexadecimalString}`;
   };
 
-  // let loadInterval;
-
-  // function loader(element) {
-  //   element.textContent = "";
-
-  //   loadInterval = setInterval(() => {
-  //     element.textContent += ".";
-
-  //     if (element.textContent === "....") {
-  //       element.textContent = "";
-  //     }
-  //   }, 300);
-  // }
 
   const handleSubmit = async (e) => {
     if (e) {
@@ -92,24 +79,10 @@ const ChatComponent = () => {
       { isAi: false, message: inputValue },
     ]);
 
-    const hasReceivedValidResponse = localStorage.getItem(
-      "hasReceivedValidResponse"
-    );
 
     const uniqueId = generateUniqueId();
 
-    if (hasReceivedValidResponse) {
-      setChatMessages((prevMessages) => [
-        ...prevMessages,
-        {
-          isAi: true,
-          message:
-            "⚠ ⚠I'm sorry, requests are being limited to one trial per person to save costs",
-          uniqueId,
-        },
-      ]);
-      return;
-    } else {
+   
       setChatMessages((prevMessages) => [
         ...prevMessages,
         {
@@ -159,12 +132,7 @@ const ChatComponent = () => {
           uniqueId,
         },
       ]);
-    }
-
-    // const response = {
-    //   ok: true,
-    //   json: async () => ({ bot: "Hello! I am a simulated response." }),
-    // };
+    
 
     try {
       const response = await fetch("https://hire-vue.onrender.com", {

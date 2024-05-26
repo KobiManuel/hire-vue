@@ -1,9 +1,9 @@
 import React from "react";
-import "./_Main.scss";
+import "../SignUp/_Main.scss";
 import { Link } from "react-router-dom";
 import Header from "../../components/Header/Header";
 
-const Signup = () => {
+const SignIn = () => {
   return (
     <>
       <Header />
@@ -160,8 +160,8 @@ const Signup = () => {
           </div>
           <button className="login">Login</button>
           <div className="footer">
-            <Link to={"/signin"} style={{ textDecoration: "none" }}>
-              <span>Sign In</span>
+            <Link to={"/signup"} style={{ textDecoration: "none" }}>
+              <span>Sign Up</span>
             </Link>
             <span>Forgot Password?</span>
           </div>
@@ -171,4 +171,4 @@ const Signup = () => {
   );
 };
 
-export default Signup;
+export default SignIn;
