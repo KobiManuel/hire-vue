@@ -1,9 +1,37 @@
-import React from "react";
+import React, { useRef } from "react";
 import "./_Main.scss";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Header from "../../components/Header/Header";
 
 const Signup = () => {
+  const emailRef = useRef(null);
+  const passwordRef = useRef(null);
+
+  const navigate = useNavigate();
+
+  const handleSubmit = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: emailRef?.current?.value,
+          password: passwordRef?.current?.value,
+        }),
+      });
+
+      if (response.ok) {
+        navigate("/chat");
+      } else {
+        console.error("Failed to sign up:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error signing in:", error);
+    }
+  };
+
   return (
     <>
       <Header />
@@ -142,6 +170,7 @@ const Signup = () => {
                 type="email"
                 name="email"
                 placeholder="Username@gmail.com"
+                ref={emailRef}
               />
             </div>
           </div>
@@ -154,11 +183,14 @@ const Signup = () => {
                 type="password"
                 name="password"
                 placeholder="············"
+                ref={passwordRef}
               />
               {/* <IonIcon className="show-hide" name="eye-outline" /> */}
             </div>
           </div>
-          <button className="login">Login</button>
+          <button className="login" onClick={handleSubmit}>
+            Sign Up
+          </button>
           <div className="footer">
             <Link to={"/signin"} style={{ textDecoration: "none" }}>
               <span>Sign In</span>

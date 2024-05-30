@@ -2,6 +2,7 @@ import express from "express";
 import * as dotenv from "dotenv";
 import cors from "cors";
 import OpenAI from "openai";
+import collection from "./mongodb.js";
 
 dotenv.config();
 
@@ -12,6 +13,97 @@ const openai = new OpenAI({
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+
+app.get("/signup", async (req, res) => {
+  res.status(200).send({ message: "Sign up successful" });
+});
+
+app.get("/login", async (req, res) => {
+  res.render("login ");
+});
+
+app.post("/signup", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Validate required fields
+    if (!email || !password) {
+      return res
+        .status(400)
+        .send({ message: "Email and password are required" });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).send({ message: "Invalid email format" });
+    }
+
+    // Validate password strength (minimum 6 characters, at least one letter and one number)
+    if (
+      password.length < 6 ||
+      !/\d/.test(password) ||
+      !/[a-zA-Z]/.test(password)
+    ) {
+      return res.status(400).send({
+        message:
+          "Password must be at least 6 characters long and include at least one letter and one number",
+      });
+    }
+
+    // Check for duplicate email
+    const existingUser = await collection.findOne({ email });
+    if (existingUser) {
+      return res.status(409).send({ message: "Email is already in use" });
+    }
+
+    // Insert new user
+    const data = { email, password };
+    await collection.insertMany([data]);
+
+    res.status(200).send({ message: "Sign up successful" });
+  } catch (error) {
+    console.error("Signup error:", error);
+    res.status(500).send({ message: "An error occurred while signing up" });
+  }
+});
+
+app.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Ensure the email and password are provided
+    if (!email || !password) {
+      return res
+        .status(400)
+        .send({ message: "Email and password are required" });
+    }
+
+    const user = await collection.findOne({ email });
+
+    // Handle case where user is not found
+    if (!user) {
+      return res.status(401).send({ message: "User not found" });
+    }
+
+    // Validate password
+    if (user.password !== password) {
+      return res.status(401).send({ message: "Incorrect password" });
+    }
+
+    // If everything is fine, send success response
+    res.status(200).send({ message: "Login successful" });
+  } catch (error) {
+    // Log the error for debugging purposes
+    console.error("Login error:", error);
+
+    // Send a generic error message
+    res
+      .status(500)
+      .send({ message: "An error occurred while trying to log in" });
+  }
+});
 
 app.get("/", async (req, res) => {
   res.status(200).send({
@@ -19,11 +111,11 @@ app.get("/", async (req, res) => {
   });
 });
 
-let newInterviewQuestions = [];
+let interviewQuestions = [];
 
 app.post("/interview-questions", async (req, res) => {
   try {
-    newInterviewQuestions = req.body.questions;
+    interviewQuestions = req.body.questions;
     console.log("this is", req.body.questions);
     res.status(200).send({ message: "Questions updated successfully" });
     console.log("questions", interviewQuestions);
