@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
 
 mongoose
   .connect("mongodb+srv://KobiManuel:doorknob91@cluster0.iabidqb.mongodb.net/")
@@ -20,6 +21,30 @@ const LoginSchema = new mongoose.Schema({
   },
 });
 
-const collection = mongoose.model("Collection1", LoginSchema);
+const InterviewSchema = new mongoose.Schema({
+  organizationName: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  interviewQuestions: {
+    type: [String],
+    required: true,
+  },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+});
 
-export default collection;
+LoginSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+  this.password = await bcrypt.hash(this.password, 10);
+  next();
+});
+
+const User = mongoose.model("User", LoginSchema);
+const Interview = mongoose.model("Interview", InterviewSchema);
+
+export { User, Interview };

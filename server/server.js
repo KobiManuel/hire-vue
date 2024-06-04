@@ -2,7 +2,9 @@ import express from "express";
 import * as dotenv from "dotenv";
 import cors from "cors";
 import OpenAI from "openai";
-import collection from "./mongodb.js";
+import { User, Interview } from "./mongodb.js";
+import authMiddleware from "./middleware/auth.js";
+import jwt from "jsonwebtoken";
 
 dotenv.config();
 
@@ -14,6 +16,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+const secretKey = process.env.JWT_SECRET || "my_secret_key";
+
+const generateToken = (user) => {
+  return jwt.sign({ id: user._id }, secretKey, { expiresIn: "1h" });
+};
 
 app.get("/signup", async (req, res) => {
   res.status(200).send({ message: "Sign up successful" });
@@ -53,16 +61,18 @@ app.post("/signup", async (req, res) => {
     }
 
     // Check for duplicate email
-    const existingUser = await collection.findOne({ email });
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(409).send({ message: "Email is already in use" });
     }
 
     // Insert new user
     const data = { email, password };
-    await collection.insertMany([data]);
+    await User.insertMany([data]);
 
-    res.status(200).send({ message: "Sign up successful" });
+    const token = generateToken(existingUser || data);
+
+    res.status(200).send({ token, message: "Sign up successful" });
   } catch (error) {
     console.error("Signup error:", error);
     res.status(500).send({ message: "An error occurred while signing up" });
@@ -80,7 +90,7 @@ app.post("/login", async (req, res) => {
         .send({ message: "Email and password are required" });
     }
 
-    const user = await collection.findOne({ email });
+    const user = await User.findOne({ email });
 
     // Handle case where user is not found
     if (!user) {
@@ -92,8 +102,9 @@ app.post("/login", async (req, res) => {
       return res.status(401).send({ message: "Incorrect password" });
     }
 
+    const token = generateToken(user);
     // If everything is fine, send success response
-    res.status(200).send({ message: "Login successful" });
+    res.status(200).send({ token, message: "Login successful" });
   } catch (error) {
     // Log the error for debugging purposes
     console.error("Login error:", error);
@@ -111,31 +122,108 @@ app.get("/", async (req, res) => {
   });
 });
 
-let interviewQuestions = [];
+app.post(
+  "/interview-questions/:organizationName",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const { organizationName, interviewQuestions } = req.body;
 
-app.post("/interview-questions", async (req, res) => {
-  try {
-    interviewQuestions = req.body.questions;
-    console.log("this is", req.body.questions);
-    res.status(200).send({ message: "Questions updated successfully" });
-    console.log("questions", interviewQuestions);
-  } catch (error) {
-    console.error("Failed to update questions:", error);
-    res.status(500).send({ error });
+      if (!organizationName || !interviewQuestions) {
+        return res.status(400).send({
+          message: "Organization name and interview questions are required",
+        });
+      }
+
+      // Check if interview questions already exist for the organization
+      const existingInterview = await Interview.findOne({ organizationName });
+
+      if (existingInterview) {
+        // Update the existing interview questions
+        existingInterview.interviewQuestions = interviewQuestions;
+        await existingInterview.save();
+        return res
+          .status(200)
+          .send({ message: "Interview questions updated successfully" });
+      } else {
+        // Create a new entry for interview questions
+        const newInterview = new Interview({
+          organizationName,
+          interviewQuestions,
+        });
+        await newInterview.save();
+        return res
+          .status(200)
+          .send({ message: "Interview questions saved successfully" });
+      }
+    } catch (error) {
+      console.error("Error saving interview questions:", error);
+      res.status(500).send({
+        message: "An error occurred while saving interview questions",
+      });
+    }
   }
-});
+);
 
-const conversationHistory = [
-  {
-    role: "system",
-    content: `You are conducting an interview. You will ask a total of ${interviewQuestions.length} questions and nothing more, DO NOT REPEAT QUESTIONS. The questions are: ${interviewQuestions}. Once all questions on the list have been asked, you should respond with: "Thank you, this interview is now concluded." from that moment on`,
-  },
-  { role: "assistant", content: "follow the instructions" },
-];
+app.get(
+  "/interview-questions/:organizationName",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const { organizationName } = req.params;
+
+      const interview = await Interview.findOne({ organizationName });
+
+      if (!interview) {
+        return res.status(404).send({
+          message:
+            "Interview questions not found for the specified organization",
+        });
+      }
+
+      res.status(200).send({
+        organizationName: interview.organizationName,
+        interviewQuestions: interview.interviewQuestions,
+      });
+    } catch (error) {
+      console.error("Error fetching interview questions:", error);
+      res.status(500).send({
+        message: "An error occurred while fetching interview questions",
+      });
+    }
+  }
+);
+
+// const conversationHistory = [
+//   {
+//     role: "system",
+//     content: `You are conducting an interview. You will ask a total of ${interviewQuestions.length} questions and nothing more, DO NOT REPEAT QUESTIONS. The questions are: ${interviewQuestions}. Once all questions on the list have been asked, you should respond with: "Thank you, this interview is now concluded." from that moment on`,
+//   },
+//   { role: "assistant", content: "follow the instructions" },
+// ];
 
 app.post("/", async (req, res) => {
   try {
-    const prompt = req.body.prompt;
+    const { prompt, organizationName } = req.body;
+
+    // Fetch interview questions from the database
+    const interview = await Interview.findOne({ organizationName });
+
+    if (!interview) {
+      return res.status(404).send({
+        message: "Interview questions not found for the specified organization",
+      });
+    }
+
+    const interviewQuestions = interview.interviewQuestions;
+
+    const conversationHistory = [
+      {
+        role: "system",
+        content: `You are conducting an interview. You will ask a total of ${interviewQuestions.length} questions and nothing more, DO NOT REPEAT QUESTIONS. The questions are: ${interviewQuestions}. Once all questions on the list have been asked, you should respond with: "Thank you, this interview is now concluded." from that moment on`,
+      },
+      { role: "assistant", content: "follow the instructions" },
+    ];
 
     conversationHistory.push({ role: "user", content: prompt });
 

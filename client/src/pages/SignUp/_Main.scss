@@ -126,6 +126,10 @@ $s: hsl(233deg 36% 38%);
     font-weight: 600;
     width: 100%;
     color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     &:hover {
       background: #1f2343;
     }
@@ -154,7 +158,14 @@ button {
 }
 
 .sec-2 {
+  display: flex;
+  gap: 14px;
+  align-items: center;
   > input {
     width: 100%;
   }
+}
+
+i {
+  cursor: pointer;
 }

@@ -1,15 +1,38 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import "../SignUp/_Main.scss";
 import { Link, useNavigate } from "react-router-dom";
 import Header from "../../components/Header/Header";
+import { IoIosMail } from "react-icons/io";
+import { FaEyeSlash, FaEye } from "react-icons/fa";
+import Loader from "../../components/Icons/Loader";
+import Toast from "../../components/Toast/Toast";
 
 const SignIn = () => {
   const emailRef = useRef(null);
   const passwordRef = useRef(null);
 
+  const [passwordVisible, setPasswordVisible] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [toastVisiblity, setToastVisibility] = useState({
+    showToast: false,
+    toastMessage: "",
+    toastStatus: "",
+  });
+
+  const { showToast, toastMessage, toastStatus } = toastVisiblity;
+
   const navigate = useNavigate();
 
+  const handleToast = (message, status) => {
+    setToastVisibility({
+      showToast: true,
+      toastMessage: message,
+      toastStatus: status,
+    });
+  };
+
   const handleSubmit = async () => {
+    setLoading(true);
     try {
       const response = await fetch("http://localhost:5000/login", {
         method: "POST",
@@ -22,9 +45,16 @@ const SignIn = () => {
         }),
       });
 
+      const { message, token } = await response?.json();
+
       if (response.ok) {
-        navigate("/chat");
+        handleToast(message, "Success");
+        setLoading(false);
+        localStorage.setItem("authToken", token);
+        navigate("/admin");
       } else {
+        handleToast(message, "Error");
+        setLoading(false);
         console.error("Failed to sign up:", response.statusText);
       }
     } catch (error) {
@@ -35,6 +65,12 @@ const SignIn = () => {
   return (
     <>
       <Header />
+      <Toast
+        setToastVisibility={setToastVisibility}
+        showToast={showToast}
+        toastMessage={toastMessage}
+        toastStatus={toastStatus}
+      />
       <section className="signup">
         <div className="screen-1">
           <svg
@@ -165,7 +201,7 @@ const SignIn = () => {
           <div className="email">
             <label htmlFor="email">Email Address</label>
             <div className="sec-2">
-              {/* <IonIcon name="mail-outline" /> */}
+              <IoIosMail />
               <input
                 type="email"
                 name="email"
@@ -177,19 +213,23 @@ const SignIn = () => {
           <div className="password">
             <label htmlFor="password">Password</label>
             <div className="sec-2">
-              {/* <IonIcon name="lock-closed-outline" /> */}
+              <i
+                style={{ width: 16, height: 16, marginTop: "-2px" }}
+                onClick={() => setPasswordVisible(!passwordVisible)}
+              >
+                {passwordVisible ? <FaEye /> : <FaEyeSlash />}
+              </i>
               <input
                 className="pas"
-                type="password"
+                type={passwordVisible ? "text" : "password"}
                 name="password"
                 placeholder="············"
                 ref={passwordRef}
               />
-              {/* <IonIcon className="show-hide" name="eye-outline" /> */}
             </div>
           </div>
-          <button className="login" onClick={handleSubmit}>
-            Login
+          <button className="login" onClick={handleSubmit} disabled={loading}>
+            {loading ? <Loader /> : "Login"}
           </button>
           <div className="footer">
             <Link to={"/signup"} style={{ textDecoration: "none" }}>
