@@ -28,6 +28,10 @@
       width: 161.28px;
       height: 49.93px;
 
+      &:disabled {
+        background: #1f2343 !important;
+      }
+
       > img {
         width: 18px;
         height: 18px;

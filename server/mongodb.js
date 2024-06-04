@@ -25,7 +25,6 @@ const InterviewSchema = new mongoose.Schema({
   organizationName: {
     type: String,
     required: true,
-    unique: true,
   },
   interviewQuestions: {
     type: [String],
@@ -43,6 +42,9 @@ LoginSchema.pre("save", async function (next) {
   this.password = await bcrypt.hash(this.password, 10);
   next();
 });
+
+// Create a compound index to enforce unique organization name per user
+InterviewSchema.index({ userId: 1, organizationName: 1 }, { unique: true });
 
 const User = mongoose.model("User", LoginSchema);
 const Interview = mongoose.model("Interview", InterviewSchema);

@@ -45,14 +45,14 @@ const SignIn = () => {
         }),
       });
 
-      const { message, token } = await response?.json();
-
       if (response.ok) {
+        const { message, token } = await response?.json();
         handleToast(message, "Success");
         setLoading(false);
         localStorage.setItem("authToken", token);
         navigate("/admin");
       } else {
+        const { message } = await response?.json();
         handleToast(message, "Error");
         setLoading(false);
         console.error("Failed to sign up:", response.statusText);

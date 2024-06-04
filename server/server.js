@@ -5,6 +5,7 @@ import OpenAI from "openai";
 import { User, Interview } from "./mongodb.js";
 import authMiddleware from "./middleware/auth.js";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
 
 dotenv.config();
 
@@ -67,10 +68,10 @@ app.post("/signup", async (req, res) => {
     }
 
     // Insert new user
-    const data = { email, password };
-    await User.insertMany([data]);
+    const user = new User({ email, password });
+    await user.save();
 
-    const token = generateToken(existingUser || data);
+    const token = generateToken(user);
 
     res.status(200).send({ token, message: "Sign up successful" });
   } catch (error) {
@@ -97,14 +98,16 @@ app.post("/login", async (req, res) => {
       return res.status(401).send({ message: "User not found" });
     }
 
+    const isMatch = await bcrypt.compare(password, user.password); // Compare hashed passwords
+
     // Validate password
-    if (user.password !== password) {
+    if (isMatch) {
+      const token = generateToken(user);
+      // If everything is fine, send success response
+      res.status(200).send({ token, message: "Login successful" });
+    } else {
       return res.status(401).send({ message: "Incorrect password" });
     }
-
-    const token = generateToken(user);
-    // If everything is fine, send success response
-    res.status(200).send({ token, message: "Login successful" });
   } catch (error) {
     // Log the error for debugging purposes
     console.error("Login error:", error);
@@ -129,6 +132,8 @@ app.post(
     try {
       const { organizationName, interviewQuestions } = req.body;
 
+      const userId = req.userId;
+
       if (!organizationName || !interviewQuestions) {
         return res.status(400).send({
           message: "Organization name and interview questions are required",
@@ -136,20 +141,21 @@ app.post(
       }
 
       // Check if interview questions already exist for the organization
-      const existingInterview = await Interview.findOne({ organizationName });
+      const existingInterview = await Interview.findOne({
+        organizationName,
+        userId,
+      });
 
       if (existingInterview) {
-        // Update the existing interview questions
-        existingInterview.interviewQuestions = interviewQuestions;
-        await existingInterview.save();
-        return res
-          .status(200)
-          .send({ message: "Interview questions updated successfully" });
+        return res.status(409).send({
+          message: "Organization name already exists for this user",
+        });
       } else {
         // Create a new entry for interview questions
         const newInterview = new Interview({
           organizationName,
           interviewQuestions,
+          userId,
         });
         await newInterview.save();
         return res
@@ -165,14 +171,57 @@ app.post(
   }
 );
 
+app.put(
+  "/interview-questions/:organizationName",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const { organizationName } = req.params;
+      const { interviewQuestions } = req.body;
+      const userId = req.userId;
+
+      if (!interviewQuestions) {
+        return res.status(400).send({
+          message: "Interview questions are required",
+        });
+      }
+
+      // Check if the interview entry exists
+      const existingInterview = await Interview.findOne({
+        organizationName,
+        userId,
+      });
+
+      if (!existingInterview) {
+        return res.status(404).send({
+          message: "Organization name not found for this user",
+        });
+      }
+
+      // Update the existing interview questions
+      existingInterview.interviewQuestions = interviewQuestions;
+      await existingInterview.save();
+      return res
+        .status(200)
+        .send({ message: "Interview questions updated successfully" });
+    } catch (error) {
+      console.error("Error updating interview questions:", error);
+      res.status(500).send({
+        message: "An error occurred while updating interview questions",
+      });
+    }
+  }
+);
+
 app.get(
   "/interview-questions/:organizationName",
   authMiddleware,
   async (req, res) => {
     try {
       const { organizationName } = req.params;
+      const userId = req.userId;
 
-      const interview = await Interview.findOne({ organizationName });
+      const interview = await Interview.findOne({ organizationName, userId });
 
       if (!interview) {
         return res.status(404).send({
