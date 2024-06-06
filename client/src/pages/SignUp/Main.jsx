@@ -11,7 +11,7 @@ const Signup = () => {
   const emailRef = useRef(null);
   const passwordRef = useRef(null);
 
-  const [passwordVisible, setPasswordVisible] = useState(true);
+  const [passwordVisible, setPasswordVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [toastVisiblity, setToastVisibility] = useState({
     showToast: false,
@@ -226,6 +226,10 @@ const Signup = () => {
                 placeholder="············"
                 ref={passwordRef}
               />
+              <span className="password-prompt-msg">
+                Password must be at least 6 characters long and include at least
+                one letter and one number
+              </span>
             </div>
           </div>
           <button className="login" onClick={handleSubmit} disabled={loading}>

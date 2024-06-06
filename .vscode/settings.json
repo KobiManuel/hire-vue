@@ -1,6 +1,7 @@
 {
-    "conventionalCommits.scopes": [
-        "User Interface",
-        "Backend optimization"
-    ]
+  "conventionalCommits.scopes": [
+    "User Interface",
+    "Backend optimization",
+    "Functionality"
+  ]
 }

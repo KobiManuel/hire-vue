@@ -33,6 +33,7 @@ const ChatComponent = () => {
   };
 
   const userName = localStorage.getItem("hireVueClient");
+  const orgName = localStorage.getItem("hireVueOrgName");
 
   function typedText(element, text) {
     setIsProcessingResponse(true);
@@ -138,7 +139,7 @@ const ChatComponent = () => {
         },
         body: JSON.stringify({
           prompt: inputValue,
-          organizationName: "Nestle",
+          organizationName: orgName,
         }),
       });
 

@@ -12,6 +12,7 @@ const Modal = ({ showModal, setShowModal }) => {
   const [isSuccess, setIsSuccess] = useState(null);
 
   const inputRef = useRef(null);
+  const debounceRef = useRef(null);
 
   const navigate = useNavigate();
 
@@ -25,11 +26,8 @@ const Modal = ({ showModal, setShowModal }) => {
     }
   }, []);
 
-  const validateInterviewLink = async (e) => {
+  const validateInterviewLink = async (organizationName) => {
     setLoading(true);
-
-    // Extract the organization name from the link
-    const organizationName = e.target.value.split("/").pop();
 
     try {
       const response = await fetch(
@@ -45,6 +43,7 @@ const Modal = ({ showModal, setShowModal }) => {
       if (response.ok) {
         setIsSuccess(true);
         setLoading(false);
+        localStorage.setItem("hireVueOrgName", organizationName);
       } else {
         setIsSuccess(false);
         setLoading(false);
@@ -52,6 +51,23 @@ const Modal = ({ showModal, setShowModal }) => {
     } catch (error) {
       console.error("Error validating interview link:", error);
     }
+  };
+
+  const handleLinkChange = (e) => {
+    if (isSuccess === false) {
+      setIsSuccess(null);
+    }
+    const link = e.target.value;
+    setInterviewLink(link);
+
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+
+    debounceRef.current = setTimeout(() => {
+      const organizationName = link.split("/").pop();
+      validateInterviewLink(organizationName);
+    }, 2000);
   };
 
   const handleTextInput = (e) => {
@@ -130,7 +146,7 @@ const Modal = ({ showModal, setShowModal }) => {
                   <input
                     placeholder="Enter your interview link here"
                     className={styles["name-input"]}
-                    onChange={validateInterviewLink}
+                    onChange={handleLinkChange}
                   />
                   {loading ? (
                     <Loader fill={"#3444da"} />
