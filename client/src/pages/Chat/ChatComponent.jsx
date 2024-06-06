@@ -131,13 +131,14 @@ const ChatComponent = () => {
     ]);
 
     try {
-      const response = await fetch("https://hire-vue.onrender.com", {
+      const response = await fetch("http://localhost:5000", {
         method: "POST",
         headers: {
           "Content-type": "application/json",
         },
         body: JSON.stringify({
           prompt: inputValue,
+          organizationName: "Nestle",
         }),
       });
 

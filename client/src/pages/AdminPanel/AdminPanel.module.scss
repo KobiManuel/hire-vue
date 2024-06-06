@@ -30,6 +30,7 @@
 
       &:disabled {
         background: #1f2343 !important;
+        cursor: not-allowed !important;
       }
 
       > img {

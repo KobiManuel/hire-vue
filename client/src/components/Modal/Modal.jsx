@@ -1,9 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
 import styles from "./Modal.module.scss";
 import { useNavigate } from "react-router-dom";
+import Loader from "../Icons/Loader";
+import SuccessIcon from "../Icons/SuccessIcon";
+import FailedIcon from "../Icons/FailedIcon";
 
 const Modal = ({ showModal, setShowModal }) => {
   const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [interviewLink, setInterviewLink] = useState("");
+  const [isSuccess, setIsSuccess] = useState(null);
 
   const inputRef = useRef(null);
 
@@ -18,6 +24,35 @@ const Modal = ({ showModal, setShowModal }) => {
       }
     }
   }, []);
+
+  const validateInterviewLink = async (e) => {
+    setLoading(true);
+
+    // Extract the organization name from the link
+    const organizationName = e.target.value.split("/").pop();
+
+    try {
+      const response = await fetch(
+        `http://localhost:5000/validateLink/${organizationName}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.ok) {
+        setIsSuccess(true);
+        setLoading(false);
+      } else {
+        setIsSuccess(false);
+        setLoading(false);
+      }
+    } catch (error) {
+      console.error("Error validating interview link:", error);
+    }
+  };
 
   const handleTextInput = (e) => {
     const value = e.target.value.trim();
@@ -89,9 +124,30 @@ const Modal = ({ showModal, setShowModal }) => {
                 )}
               </div>
 
+              <div className={styles.link}>
+                <label>Interview Link</label>
+                <div>
+                  <input
+                    placeholder="Enter your interview link here"
+                    className={styles["name-input"]}
+                    onChange={validateInterviewLink}
+                  />
+                  {loading ? (
+                    <Loader fill={"#3444da"} />
+                  ) : isSuccess ? (
+                    <SuccessIcon />
+                  ) : isSuccess === false ? (
+                    <FailedIcon />
+                  ) : (
+                    ""
+                  )}
+                </div>
+              </div>
+
               <button
                 className={styles["get-started-btn"]}
                 onClick={handleGetStarted}
+                disabled={!isSuccess}
               >
                 Get Started
                 <span></span>

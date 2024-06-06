@@ -2,7 +2,9 @@ import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
 mongoose
-  .connect("mongodb+srv://KobiManuel:doorknob91@cluster0.iabidqb.mongodb.net/")
+  .connect(
+    "mongodb+srv://KobiManuel:doorknob91@cluster0.iabidqb.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+  )
   .then(() => {
     console.log("mongodb connected");
   })

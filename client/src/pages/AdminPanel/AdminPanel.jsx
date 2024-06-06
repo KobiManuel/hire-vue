@@ -266,7 +266,7 @@ const AdminPanel = () => {
 
         <button
           className={styles.btn}
-          onClick={alreadyExists ? handleUpdate : handleSubmit}
+          onClick={interviewData ? handleUpdate : handleSubmit}
           disabled={loading || alreadyExists}
         >
           {loading ? <Loader /> : "Submit"}
