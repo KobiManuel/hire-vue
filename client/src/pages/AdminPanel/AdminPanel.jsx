@@ -128,13 +128,13 @@ const AdminPanel = () => {
       const response = await fetch(
         `http://localhost:5000/interview-questions/${orgName}`,
         {
-          method: "PUT",
+          method: "PATCH",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            organizationName: companyRef?.current?.value.trim(),
+            newOrganizationName: companyRef?.current?.value.trim(),
             interviewQuestions: questionsArray,
           }),
         }

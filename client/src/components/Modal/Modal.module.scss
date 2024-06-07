@@ -220,10 +220,10 @@
   transition-delay: calc((var(--n) - 1) * 0.1s);
   z-index: -1;
 }
-.get-started-btn:hover {
-  color: #3444da;
-  border: 1px solid #3444da;
-}
+// .get-started-btn:hover {
+//   color: #3444da;
+//   border: 1px solid #3444da;
+// }
 .get-started-btn:hover span {
   transform: translateY(0) scale(2);
 }

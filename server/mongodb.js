@@ -37,6 +37,14 @@ const InterviewSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
+  candidates: [
+    {
+      name: { type: String, required: true },
+      email: { type: String, required: true },
+      score: { type: Number, required: false },
+      authToken: { type: String, required: false },
+    },
+  ],
 });
 
 LoginSchema.pre("save", async function (next) {

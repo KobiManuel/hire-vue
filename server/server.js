@@ -4,8 +4,10 @@ import cors from "cors";
 import OpenAI from "openai";
 import { User, Interview } from "./mongodb.js";
 import authMiddleware from "./middleware/auth.js";
+import verifyToken from "./middleware/verifyToken.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import nodemailer from "nodemailer";
 
 dotenv.config();
 
@@ -125,6 +127,140 @@ app.get("/", async (req, res) => {
   });
 });
 
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+const sendEmail = (to, subject, text) => {
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to,
+    subject,
+    text,
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error("Error sending email:", error);
+    } else {
+      console.log("Email sent:", info.response);
+    }
+  });
+};
+
+app.post("/save-interview-data", async (req, res) => {
+  try {
+    const { organizationName, name, email, score } = req.body;
+
+    if (!organizationName || !name || !email) {
+      return res.status(400).send({ message: "All fields are required" });
+    }
+
+    const interview = await Interview.findOne({ organizationName });
+
+    if (!interview) {
+      return res.status(404).send({ message: "Organization not found" });
+    }
+
+    const existingCandidate = interview.candidates.find(
+      (candidate) => candidate.email === email
+    );
+
+    if (existingCandidate) {
+      return res
+        .status(409)
+        .send({ message: "Candidate with this email already exists" });
+    }
+
+    const candidate = {
+      name,
+      email,
+      score,
+      authToken: jwt.sign({ email, organizationName }, secretKey),
+    };
+    interview.candidates.push(candidate);
+    await interview.save();
+
+    res.status(200).send({
+      message: "Interview data saved successfully",
+      authToken: candidate.authToken,
+    });
+  } catch (error) {
+    console.error("Error saving interview data:", error);
+    res
+      .status(500)
+      .send({ message: "An error occurred while saving interview data" });
+  }
+});
+
+app.patch("/update-score", verifyToken, async (req, res) => {
+  try {
+    const { organizationName, email, score } = req.body;
+
+    if (!organizationName || !email || score == null) {
+      return res.status(400).send({ message: "All fields are required" });
+    }
+
+    const interview = await Interview.findOne({ organizationName });
+
+    if (!interview) {
+      return res.status(404).send({ message: "Organization not found" });
+    }
+
+    const candidate = interview.candidates.find(
+      (candidate) => candidate.email === email
+    );
+
+    if (!candidate) {
+      return res.status(404).send({ message: "Candidate not found" });
+    }
+
+    candidate.score = score;
+    candidate.authToken = null; // Invalidate the token
+    await interview.save();
+
+    // Determine pass/fail based on the score
+    const passCutoff = 60; // Example cutoff score for passing
+    const passOrFail = score >= passCutoff ? "passed" : "failed";
+
+    // Send email notification to the candidate
+    const subject = "Interview Update";
+    const text = `Hello ${candidate.name},\n\nYour interview score is ${score}. You have ${passOrFail} the interview cut-off.\n\nBest regards,\nThe Interview Team`;
+    sendEmail(email, subject, text);
+
+    res
+      .status(200)
+      .send({ message: "Score updated successfully and email sent" });
+  } catch (error) {
+    console.error("Error updating score and sending mail:", error);
+    res.status(500).send({ message: "Error updating score and sending mail" });
+  }
+});
+
+app.get("/candidates/:organizationName", authMiddleware, async (req, res) => {
+  try {
+    const { organizationName } = req.params;
+    const userId = req.userId;
+
+    const interview = await Interview.findOne({ organizationName, userId });
+
+    if (!interview) {
+      return res.status(404).send({ message: "Organization not found" });
+    }
+
+    res.status(200).send({ candidates: interview.candidates });
+  } catch (error) {
+    console.error("Error fetching candidates:", error);
+    res
+      .status(500)
+      .send({ message: "An error occurred while fetching candidates" });
+  }
+});
+
 app.post(
   "/interview-questions/:organizationName",
   authMiddleware,
@@ -171,13 +307,13 @@ app.post(
   }
 );
 
-app.put(
+app.patch(
   "/interview-questions/:organizationName",
   authMiddleware,
   async (req, res) => {
     try {
       const { organizationName } = req.params;
-      const { interviewQuestions } = req.body;
+      const { interviewQuestions, newOrganizationName } = req.body;
       const userId = req.userId;
 
       if (!interviewQuestions) {
@@ -200,6 +336,7 @@ app.put(
 
       // Update the existing interview questions
       existingInterview.interviewQuestions = interviewQuestions;
+      existingInterview.organizationName = newOrganizationName;
       await existingInterview.save();
       return res
         .status(200)
@@ -274,7 +411,7 @@ app.get("/validateLink/:organizationName", async (req, res) => {
 //   { role: "assistant", content: "follow the instructions" },
 // ];
 
-app.post("/", async (req, res) => {
+app.post("/", verifyToken, async (req, res) => {
   try {
     const { prompt, organizationName } = req.body;
 
@@ -287,20 +424,27 @@ app.post("/", async (req, res) => {
       });
     }
 
-    const interviewQuestions = interview.interviewQuestions;
+    const initialInterviewQuestions = interview.interviewQuestions;
+
+    const interviewQuestions = [
+      ...initialInterviewQuestions,
+      "Thank you, this interview is now concluded. You have scored {something} percent",
+    ];
 
     const conversationHistory = [
       {
         role: "system",
-        content: `You are conducting an interview. You will ask a total of ${interviewQuestions.length} questions and nothing more, DO NOT REPEAT QUESTIONS. The questions are: ${interviewQuestions}. Once all questions on the list have been asked, you should respond with: "Thank you, this interview is now concluded." from that moment on`,
+        content: `You are conducting an interview. MAKE SURE TO ADD THE CANDIDATES SCORE IN THE FINAL MESSAGE. You will ask a total of ${interviewQuestions.length} questions and nothing more, with the last message being a final message to the user, DO NOT REPEAT QUESTIONS. The questions are: ${interviewQuestions}. TAKE NOTE OF THE CONVERSATION AND DEDUCE A PERCENTAGE SCORE BASED ON THE USER'S RESPONSE TO ALL THE QUESTIONS AND INCLUDE THE SCORE IN THE {SOMETHING} BRACKET OF THE LAST TEXT STRING IN THE QUESTIONS LIST.`,
       },
       { role: "assistant", content: "follow the instructions" },
     ];
 
     conversationHistory.push({ role: "user", content: prompt });
 
+    console.log(interviewQuestions);
+
     const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: "gpt-4o",
       messages: conversationHistory, // Pass the entire history
       temperature: 0,
       max_tokens: 400,

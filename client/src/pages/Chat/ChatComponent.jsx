@@ -7,6 +7,9 @@ import CopyIcon from "../../components/Icons/CopyIcon";
 import CheckCircle from "../../components/Icons/CheckCircle";
 import Header from "../../components/Header/Header";
 import KeepWebsiteAlive from "../../components/KeepWebsiteAlive";
+import { useNavigate } from "react-router-dom";
+import Loader from "../../components/Icons/Loader";
+import Toast from "../../components/Toast/Toast";
 
 const ChatComponent = () => {
   const [chatMessages, setChatMessages] = useState([]);
@@ -14,13 +17,35 @@ const ChatComponent = () => {
   const [buttonText, setButtonText] = useState("");
   const [isProcessingResponse, setIsProcessingResponse] = useState(false);
   const [copiedMessageId, setCopiedMessageId] = useState(null);
+  const [isLoading, setIsLoading] = useState({
+    requestLoading: false,
+    hideTextArea: false,
+  });
+  const [toastVisiblity, setToastVisibility] = useState({
+    showToast: false,
+    toastMessage: "",
+    toastStatus: "",
+  });
 
   KeepWebsiteAlive();
 
+  const navigate = useNavigate();
   const typingTextRef = useRef(null);
   const formRef = useRef(null);
   const textareaRef = useRef(null);
   const completionContainerRef = useRef(null);
+  const lastMessageRef = useRef(null);
+
+  const { requestLoading, hideTextArea } = isLoading;
+  const { showToast, toastMessage, toastStatus } = toastVisiblity;
+
+  const handleToast = (message, status) => {
+    setToastVisibility({
+      showToast: true,
+      toastMessage: message,
+      toastStatus: status,
+    });
+  };
 
   const capitalizeFirstTwoLetters = (str) => {
     return str
@@ -34,6 +59,7 @@ const ChatComponent = () => {
 
   const userName = localStorage.getItem("hireVueClient");
   const orgName = localStorage.getItem("hireVueOrgName");
+  const token = localStorage.getItem("hireVueClientToken");
 
   function typedText(element, text) {
     setIsProcessingResponse(true);
@@ -136,6 +162,7 @@ const ChatComponent = () => {
         method: "POST",
         headers: {
           "Content-type": "application/json",
+          Authorization: `${token}`,
         },
         body: JSON.stringify({
           prompt: inputValue,
@@ -150,7 +177,63 @@ const ChatComponent = () => {
         const parsedData = data.bot.trim();
         messageDiv.innerHTML = "";
         typedText(document.getElementById(uniqueId), parsedData);
-        // localStorage.setItem("hasReceivedValidResponse", "true");
+
+        // Check if response contains "interview is concluded" and extract score
+        const wordsToCheck = ["interview", "concluded"];
+
+        let count = 0;
+        for (const word of wordsToCheck) {
+          if (parsedData.includes(word)) {
+            count++;
+            console.log("it includes");
+          }
+        }
+
+        if (count >= 2) {
+          console.log("count is 2");
+          const scoreMatch = parsedData.match(/(\d+)%/);
+          if (scoreMatch) {
+            const score = scoreMatch[1];
+
+            setTimeout(() => {
+              setIsLoading({
+                hideTextArea: true,
+                requestLoading: true,
+              });
+            }, 2000);
+
+            // Send PATCH request to update candidate details
+            const updateResponse = await fetch(
+              `http://localhost:5000/interview-questions/${orgName}`,
+              {
+                method: "PATCH",
+                headers: {
+                  "Content-type": "application/json",
+                  Authorization: `${token}`,
+                },
+                body: JSON.stringify({ score }),
+              }
+            );
+
+            if (updateResponse.ok) {
+              setIsLoading((prevValues) => ({
+                ...prevValues,
+                requestLoading: false,
+              }));
+              navigate("/interview-done");
+            } else {
+              setIsLoading((prevValues) => ({
+                ...prevValues,
+                requestLoading: false,
+              }));
+              handleToast("There was an error saving your details", "Error");
+              console.error("Failed to update interview score.");
+              setTimeout(() => {
+                navigate("/interview-done");
+              }, 2000);
+            }
+          }
+        }
       } else {
         if (response.status === 429) {
           messageDiv.innerHTML =
@@ -221,6 +304,12 @@ const ChatComponent = () => {
     return () => {};
   }, [buttonText]);
 
+  useEffect(() => {
+    if (lastMessageRef.current) {
+      lastMessageRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [chatMessages]);
+
   const autoResize = () => {
     const formElement = formRef.current;
     const textareaElement = textareaRef.current;
@@ -232,168 +321,140 @@ const ChatComponent = () => {
   };
 
   return (
-    <div className="chat-container-body">
-      <Header />
-      <div id="app">
-        <div id="typing-text" className="wrapper ai" ref={typingTextRef}>
-          <span className="profile ai"></span>
-        </div>
-        <div id="chat_container">
-          {chatMessages.map((msg, index) => (
-            <div key={index} className={`wrapper ${msg.isAi ? "ai" : ""}`}>
-              {msg.isAi && (
-                <button
-                  id="btn"
-                  onClick={(event) => handleClick(event, msg.uniqueId)}
-                >
-                  {copiedMessageId === msg.uniqueId ? (
-                    <CheckCircle className={"svg"} size={18} />
-                  ) : (
-                    <CopyIcon size={18} />
-                  )}
+    <>
+      {requestLoading && <Loader />}
+      <Toast
+        setToastVisibility={setToastVisibility}
+        showToast={showToast}
+        toastMessage={toastMessage}
+        toastStatus={toastStatus}
+      />
+      <div className="chat-container-body">
+        <Header />
+        <div id="app">
+          <div id="typing-text" className="wrapper ai" ref={typingTextRef}>
+            <span className="profile ai"></span>
+          </div>
+          <div id="chat_container">
+            {chatMessages.map((msg, index) => (
+              <div
+                key={index}
+                className={`wrapper ${msg.isAi ? "ai" : ""}`}
+                ref={index === chatMessages.length - 1 ? lastMessageRef : null}
+              >
+                {msg.isAi && (
+                  <button
+                    id="btn"
+                    onClick={(event) => handleClick(event, msg.uniqueId)}
+                  >
+                    {copiedMessageId === msg.uniqueId ? (
+                      <CheckCircle className={"svg"} size={18} />
+                    ) : (
+                      <CopyIcon size={18} />
+                    )}
 
-                  {copiedMessageId === msg.uniqueId ? (
-                    <span className="copy_float">Copied</span>
-                  ) : (
-                    ""
-                  )}
-                </button>
-              )}
+                    {copiedMessageId === msg.uniqueId ? (
+                      <span className="copy_float">Copied</span>
+                    ) : (
+                      ""
+                    )}
+                  </button>
+                )}
 
-              <div className="chat">
-                <div className="profile">
-                  {msg.isAi ? (
-                    ""
-                  ) : userName ? (
-                    <span className="username">
-                      {capitalizeFirstTwoLetters(userName)}
-                    </span>
-                  ) : (
-                    <img src={user} alt="user" />
-                  )}
-                </div>
-                <div className="message" id={msg.uniqueId}>
-                  {msg.message}
+                <div className="chat">
+                  <div className="profile">
+                    {msg.isAi ? (
+                      ""
+                    ) : userName ? (
+                      <span className="username">
+                        {capitalizeFirstTwoLetters(userName)}
+                      </span>
+                    ) : (
+                      <img src={user} alt="user" />
+                    )}
+                  </div>
+                  <div className="message" id={msg.uniqueId}>
+                    {msg.message}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
 
-        <div className="form-container">
-          {!isProcessingResponse && chatMessages.length < 1 ? (
-            <div
-              className="completetion-container-main"
-              ref={completionContainerRef}
-            >
-              <ButtonWithImage
-                buttonText="What Is Artificial Intelligence?"
-                onButtonClick={handleButtonClick}
-              />
-              <ButtonWithImage
-                buttonText="Write a birthday wish for my friend"
-                onButtonClick={handleButtonClick}
-              />
-              <ButtonWithImage
-                buttonText="Give me a list of Instagram captions"
-                onButtonClick={handleButtonClick}
-              />
-              <ButtonWithImage
-                buttonText="Who was the best Roman emperor?"
-                onButtonClick={handleButtonClick}
-              />
-            </div>
-          ) : (
-            ""
-          )}
-          <form
-            style={{ minHeight: "62px" }}
-            onSubmit={handleSubmit}
-            onInput={autoResize}
-            ref={formRef}
-            className="form"
+          <div
+            className="form-container"
+            style={{ display: hideTextArea && "none" }}
           >
-            <textarea
-              name="prompt"
-              rows="1"
-              cols="1"
-              placeholder="Type Response..."
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              ref={textareaRef}
-              disabled={isProcessingResponse}
-              className="textarea"
-            />
-            <button type="submit">
-              {isProcessingResponse ? (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                >
-                  <circle cx="18" cy="12" r="0" fill="currentColor">
-                    <animate
-                      attributeName="r"
-                      begin=".67"
-                      calcMode="spline"
-                      dur="1.5s"
-                      keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8"
-                      repeatCount="indefinite"
-                      values="0;2;0;0"
-                    />
-                  </circle>
-                  <circle cx="12" cy="12" r="0" fill="currentColor">
-                    <animate
-                      attributeName="r"
-                      begin=".33"
-                      calcMode="spline"
-                      dur="1.5s"
-                      keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8"
-                      repeatCount="indefinite"
-                      values="0;2;0;0"
-                    />
-                  </circle>
-                  <circle cx="6" cy="12" r="0" fill="currentColor">
-                    <animate
-                      attributeName="r"
-                      begin="0"
-                      calcMode="spline"
-                      dur="1.5s"
-                      keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8"
-                      repeatCount="indefinite"
-                      values="0;2;0;0"
-                    />
-                  </circle>
-                </svg>
-              ) : (
-                <img src={send} alt="Send" />
-              )}
-            </button>
-          </form>
+            <form
+              style={{ minHeight: "62px" }}
+              onSubmit={handleSubmit}
+              onInput={autoResize}
+              ref={formRef}
+              className="form"
+            >
+              <textarea
+                name="prompt"
+                rows="1"
+                cols="1"
+                placeholder="Type Response..."
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                ref={textareaRef}
+                disabled={isProcessingResponse}
+                className="textarea"
+              />
+              <button type="submit">
+                {isProcessingResponse ? (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle cx="18" cy="12" r="0" fill="currentColor">
+                      <animate
+                        attributeName="r"
+                        begin=".67"
+                        calcMode="spline"
+                        dur="1.5s"
+                        keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8"
+                        repeatCount="indefinite"
+                        values="0;2;0;0"
+                      />
+                    </circle>
+                    <circle cx="12" cy="12" r="0" fill="currentColor">
+                      <animate
+                        attributeName="r"
+                        begin=".33"
+                        calcMode="spline"
+                        dur="1.5s"
+                        keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8"
+                        repeatCount="indefinite"
+                        values="0;2;0;0"
+                      />
+                    </circle>
+                    <circle cx="6" cy="12" r="0" fill="currentColor">
+                      <animate
+                        attributeName="r"
+                        begin="0"
+                        calcMode="spline"
+                        dur="1.5s"
+                        keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8"
+                        repeatCount="indefinite"
+                        values="0;2;0;0"
+                      />
+                    </circle>
+                  </svg>
+                ) : (
+                  <img src={send} alt="Send" />
+                )}
+              </button>
+            </form>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
 export default ChatComponent;
-
-const ButtonWithImage = ({ buttonText, onButtonClick }) => {
-  const [isHovered, setIsHovered] = useState(false);
-
-  const phoneScreenWidth = 700;
-  const isPhoneScreen = window.innerWidth < phoneScreenWidth;
-
-  return (
-    <button
-      className="completetion-container"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onClick={() => onButtonClick(buttonText)}
-    >
-      {buttonText}{" "}
-      {isHovered && !isPhoneScreen ? <img src={send} alt="Send" /> : ""}
-    </button>
-  );
-};

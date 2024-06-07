@@ -6,6 +6,7 @@ import ChatComponent from "./pages/Chat/ChatComponent";
 import SignUp from "./pages/SignUp/Main";
 import SignIn from "./pages/SignIn/Main";
 import AdminPanel from "./pages/AdminPanel/AdminPanel";
+import SuccessPage from "./pages/SuccessPage/Main";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="signup" element={<SignUp />} />
         <Route path="signin" element={<SignIn />} />
         <Route path="admin" element={<AdminPanel />} />
+        <Route path="interview-done" element={<SuccessPage />} />
       </Routes>
     </>
   );
