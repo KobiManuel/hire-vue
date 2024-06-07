@@ -60,7 +60,7 @@ const Modal = ({ showModal, setShowModal }) => {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/validateLink/${organizationName}`,
+        `https://hire-vue.onrender.com/validateLink/${organizationName}`,
         {
           method: "GET",
           headers: {
@@ -145,7 +145,7 @@ const Modal = ({ showModal, setShowModal }) => {
       setRequestLoading(true);
       try {
         const response = await fetch(
-          `http://localhost:5000/save-interview-data`,
+          `https://hire-vue.onrender.com/save-interview-data`,
           {
             method: "POST",
             headers: {

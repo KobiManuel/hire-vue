@@ -158,7 +158,7 @@ const ChatComponent = () => {
     ]);
 
     try {
-      const response = await fetch("http://localhost:5000", {
+      const response = await fetch("https://hire-vue.onrender.com", {
         method: "POST",
         headers: {
           "Content-type": "application/json",
@@ -204,7 +204,7 @@ const ChatComponent = () => {
 
             // Send PATCH request to update candidate details
             const updateResponse = await fetch(
-              `http://localhost:5000/interview-questions/${orgName}`,
+              `https://hire-vue.onrender.com/interview-questions/${orgName}`,
               {
                 method: "PATCH",
                 headers: {
