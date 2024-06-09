@@ -428,7 +428,7 @@ app.post("/", verifyToken, async (req, res) => {
 
     const interviewQuestions = [
       ...initialInterviewQuestions,
-      "Thank you, this interview is now concluded. You have scored {something} percent",
+      "Thank you, this interview is now concluded",
     ];
 
     const conversationHistory = [
@@ -440,8 +440,6 @@ app.post("/", verifyToken, async (req, res) => {
     ];
 
     conversationHistory.push({ role: "user", content: prompt });
-
-    console.log(interviewQuestions);
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
