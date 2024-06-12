@@ -411,9 +411,11 @@ app.get("/validateLink/:organizationName", async (req, res) => {
 //   { role: "assistant", content: "follow the instructions" },
 // ];
 
+const interviewSessions = {};
+
 app.post("/", verifyToken, async (req, res) => {
   try {
-    const { prompt, organizationName } = req.body;
+    const { prompt, organizationName, sessionId } = req.body;
 
     // Fetch interview questions from the database
     const interview = await Interview.findOne({ organizationName });
@@ -424,26 +426,35 @@ app.post("/", verifyToken, async (req, res) => {
       });
     }
 
-    const initialInterviewQuestions = interview.interviewQuestions;
+    if (!interviewSessions[sessionId]) {
+      // Initialize a new session if it doesn't exist
+      interviewSessions[sessionId] = {
+        questions: [
+          ...interview.interviewQuestions,
+          "Thank you, this interview is now concluded",
+        ],
+        conversationHistory: [
+          {
+            role: "system",
+            content: `You are conducting an interview. MAKE SURE TO ADD THE CANDIDATES SCORE IN THE FINAL MESSAGE. You will ask a total of ${interview.interviewQuestions.length} questions and nothing more, with the last message being a final message to the user, DO NOT REPEAT QUESTIONS. TAKE NOTE OF THE CONVERSATION AND DEDUCE A PERCENTAGE SCORE BASED ON THE USER'S RESPONSE TO ALL THE QUESTIONS AND INCLUDE THE SCORE IN THE {SOMETHING} BRACKET OF THE LAST TEXT STRING IN THE QUESTIONS LIST.`,
+          },
+          { role: "assistant", content: "follow the instructions" },
+        ],
+        currentQuestionIndex: 0,
+      };
+    }
 
-    const interviewQuestions = [
-      ...initialInterviewQuestions,
-      "Thank you, this interview is now concluded",
-    ];
+    const session = interviewSessions[sessionId];
+    const currentQuestion = session.questions[session.currentQuestionIndex];
 
-    const conversationHistory = [
-      {
-        role: "system",
-        content: `You are conducting an interview. MAKE SURE TO ADD THE CANDIDATES SCORE IN THE FINAL MESSAGE. You will ask a total of ${interviewQuestions.length} questions and nothing more, with the last message being a final message to the user, DO NOT REPEAT QUESTIONS. The questions are: ${interviewQuestions}. TAKE NOTE OF THE CONVERSATION AND DEDUCE A PERCENTAGE SCORE BASED ON THE USER'S RESPONSE TO ALL THE QUESTIONS AND INCLUDE THE SCORE IN THE {SOMETHING} BRACKET OF THE LAST TEXT STRING IN THE QUESTIONS LIST.`,
-      },
-      { role: "assistant", content: "follow the instructions" },
-    ];
-
-    conversationHistory.push({ role: "user", content: prompt });
+    session.conversationHistory.push({ role: "user", content: prompt });
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
-      messages: conversationHistory, // Pass the entire history
+      messages: [
+        ...session.conversationHistory,
+        { role: "assistant", content: currentQuestion },
+      ],
       temperature: 0,
       max_tokens: 400,
       top_p: 1,
@@ -452,14 +463,24 @@ app.post("/", verifyToken, async (req, res) => {
     });
 
     // Append assistant message to conversation history
-    conversationHistory.push({
+    session.conversationHistory.push({
       role: "assistant",
       content: response.choices[0].message.content,
     });
 
+    session.currentQuestionIndex++;
+
     res.status(200).send({
       bot: response.choices[0].message.content,
+      nextQuestion: session.questions[session.currentQuestionIndex] || null,
+      interviewConcluded:
+        session.currentQuestionIndex >= session.questions.length,
     });
+
+    // Optionally clean up the session if the interview is concluded
+    if (session.currentQuestionIndex >= session.questions.length) {
+      delete interviewSessions[sessionId];
+    }
   } catch (error) {
     console.log(error);
     res.status(500).send({ error });
