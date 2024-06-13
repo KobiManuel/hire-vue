@@ -26,6 +26,8 @@ const ChatComponent = () => {
     toastMessage: "",
     toastStatus: "",
   });
+  const [interviewQuestions, setInterviewQuestions] = useState([]);
+  const [isLastQuestion, setIsLastQuestion] = useState(false);
 
   KeepWebsiteAlive();
 
@@ -83,6 +85,22 @@ const ChatComponent = () => {
     const hexadecimalString = randomNumber.toString(16);
     return `id-${timeStamp}-${hexadecimalString}`;
   };
+
+  useEffect(() => {
+    // Fetch interview questions for the candidate's organization
+    fetch(`/interview-questions/${orgName}`, {
+      headers: {
+        Authorization: `${token}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setInterviewQuestions(data.interviewQuestions);
+      })
+      .catch((error) => {
+        console.error("Error fetching interview questions:", error);
+      });
+  }, [orgName, token]);
 
   const handleSubmit = async (e) => {
     if (e) {
@@ -177,6 +195,24 @@ const ChatComponent = () => {
         const parsedData = data.bot.trim();
         messageDiv.innerHTML = "";
         typedText(document.getElementById(uniqueId), parsedData);
+
+        if (
+          chatMessages.filter((msg) => !msg.isAi).length ===
+          interviewQuestions.length - 1
+        ) {
+          setIsLastQuestion(true);
+        }
+
+        if (isLastQuestion) {
+          const score = Math.floor(Math.random() * 101);
+          const finalMessage = `Thank you, this interview is now concluded. You have scored ${score} percent`;
+
+          setChatMessages((prevMessages) => [
+            ...prevMessages,
+            { isAi: false, message: inputValue },
+            { isAi: true, message: finalMessage, uniqueId: generateUniqueId() },
+          ]);
+        }
 
         // Check if response contains "interview is concluded" and extract score
         const wordsToCheck = ["interview", "concluded"];
