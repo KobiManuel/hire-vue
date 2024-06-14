@@ -59,7 +59,7 @@ const Modal = ({ showModal, setShowModal }) => {
 
     try {
       const response = await fetch(
-        `https://hire-vue.onrender.com/${organizationName}`,
+        `https://hire-vue.onrender.com/validateLink/${organizationName}`,
         {
           method: "GET",
           headers: {
