@@ -62,6 +62,7 @@ const ChatComponent = () => {
   const userName = localStorage.getItem("hireVueClient");
   const orgName = localStorage.getItem("hireVueOrgName");
   const token = localStorage.getItem("hireVueClientToken");
+  const email = localStorage.getItem("hireVueClientEmail");
 
   function typedText(element, text) {
     setIsProcessingResponse(true);
@@ -88,7 +89,7 @@ const ChatComponent = () => {
 
   useEffect(() => {
     // Fetch interview questions for the candidate's organization
-    fetch(`/interview-questions/${orgName}`, {
+    fetch(`http://localhost:5000/get-interview-questions/${orgName}`, {
       headers: {
         Authorization: `${token}`,
       },
@@ -106,8 +107,6 @@ const ChatComponent = () => {
     if (e) {
       e.preventDefault();
     }
-
-    completionContainerRef?.current?.classList.add("hidden");
 
     typingTextRef?.current?.classList.add("hidden");
 
@@ -212,62 +211,45 @@ const ChatComponent = () => {
             { isAi: false, message: inputValue },
             { isAi: true, message: finalMessage, uniqueId: generateUniqueId() },
           ]);
-        }
 
-        // Check if response contains "interview is concluded" and extract score
-        const wordsToCheck = ["interview", "concluded"];
+          setIsLoading({
+            hideTextArea: true,
+            requestLoading: true,
+          });
 
-        let count = 0;
-        for (const word of wordsToCheck) {
-          if (parsedData.includes(word)) {
-            count++;
-            console.log("it includes");
-          }
-        }
-
-        if (count >= 2) {
-          console.log("count is 2");
-          const scoreMatch = parsedData.match(/(\d+)%/);
-          if (scoreMatch) {
-            const score = scoreMatch[1];
-
-            setTimeout(() => {
-              setIsLoading({
-                hideTextArea: true,
-                requestLoading: true,
-              });
-            }, 2000);
-
-            // Send PATCH request to update candidate details
-            const updateResponse = await fetch(
-              `http://localhost:5000/interview-questions/${orgName}`,
-              {
-                method: "PATCH",
-                headers: {
-                  "Content-type": "application/json",
-                  Authorization: `${token}`,
-                },
-                body: JSON.stringify({ score }),
-              }
-            );
-
-            if (updateResponse.ok) {
-              setIsLoading((prevValues) => ({
-                ...prevValues,
-                requestLoading: false,
-              }));
-              navigate("/interview-done");
-            } else {
-              setIsLoading((prevValues) => ({
-                ...prevValues,
-                requestLoading: false,
-              }));
-              handleToast("There was an error saving your details", "Error");
-              console.error("Failed to update interview score.");
-              setTimeout(() => {
-                navigate("/interview-done");
-              }, 2000);
+          // Send PATCH request to update candidate details
+          const updateResponse = await fetch(
+            `http://localhost:5000/update-score`,
+            {
+              method: "PATCH",
+              headers: {
+                "Content-type": "application/json",
+                Authorization: `${token}`,
+              },
+              body: JSON.stringify({
+                organizationName: orgName,
+                email: email,
+                score: score,
+              }),
             }
+          );
+
+          if (updateResponse.ok) {
+            setIsLoading((prevValues) => ({
+              ...prevValues,
+              requestLoading: false,
+            }));
+            navigate("/interview-done");
+          } else {
+            setIsLoading((prevValues) => ({
+              ...prevValues,
+              requestLoading: false,
+            }));
+            handleToast("There was an error saving your details", "Error");
+            console.error("Failed to update interview score.");
+            setTimeout(() => {
+              navigate("/interview-done");
+            }, 2000);
           }
         }
       } else {

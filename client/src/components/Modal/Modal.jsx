@@ -165,6 +165,10 @@ const Modal = ({ showModal, setShowModal }) => {
           localStorage.setItem("hireVueOrgName", interviewLink);
           localStorage.setItem("hireVueClient", value);
           localStorage.setItem("hireVueClientToken", authToken);
+          localStorage.setItem(
+            "hireVueClientEmail",
+            emailRef?.current?.value.trim()
+          );
           setRequestLoading(false);
           navigate("/chat");
         } else {

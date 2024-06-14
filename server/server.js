@@ -132,15 +132,32 @@ app.get("/", async (req, res) => {
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
 });
 
+// const mailOptions = await transporter.sendMail({
+//   from: {
+//     name: "Hirevue",
+//     address: process.env.EMAIL_USER,
+//   }, // sender address
+//   to: ["Kobi@awadigital.co"], // list of receivers
+//   subject: "Hello ✔", // Subject line
+//   text: "Hello world?", // plain text body
+//   html: "<b>Hello world?</b>", // html body
+// });
+
 const sendEmail = (to, subject, text) => {
   const mailOptions = {
-    from: process.env.EMAIL_USER,
+    from: {
+      name: "Hirevue",
+      address: process.env.EMAIL_USER,
+    },
     to,
     subject,
     text,
@@ -204,8 +221,8 @@ app.patch("/update-score", verifyToken, async (req, res) => {
   try {
     const { organizationName, email, score } = req.body;
 
-    if (!organizationName || !email || score == null) {
-      return res.status(400).send({ message: "All fields are required" });
+    if (score == null) {
+      return res.status(400).send({ message: "No score found to update" });
     }
 
     const interview = await Interview.findOne({ organizationName });
@@ -383,6 +400,30 @@ app.get(
   }
 );
 
+app.get("/get-interview-questions/:organizationName", async (req, res) => {
+  try {
+    const { organizationName } = req.params;
+
+    const interview = await Interview.findOne({ organizationName });
+
+    if (!interview) {
+      return res.status(404).send({
+        message: "Interview questions not found for the specified organization",
+      });
+    }
+
+    res.status(200).send({
+      organizationName: interview.organizationName,
+      interviewQuestions: interview.interviewQuestions,
+    });
+  } catch (error) {
+    console.error("Error fetching interview questions:", error);
+    res.status(500).send({
+      message: "An error occurred while fetching interview questions",
+    });
+  }
+});
+
 app.get("/validateLink/:organizationName", async (req, res) => {
   try {
     const { organizationName } = req.params;
@@ -445,7 +486,7 @@ app.post("/", verifyToken, async (req, res) => {
           {
             text: `You are conducting an interview with a total of ${
               interviewQuestions.length
-            } questions. The last question includes a score placeholder. DO NOT REPEAT QUESTIONS. TAKE NOTE OF THE CONVERSATION AND DEDUCE A PERCENTAGE SCORE BASED ON THE USER'S RESPONSE TO ALL THE QUESTIONS AND INCLUDE THE SCORE IN THE {SOMETHING} BRACKET OF THE LAST TEXT STRING IN THE QUESTIONS LIST. END THE INTERVIEW BY DISPLAYING THE SCORE PLACEHOLDER.   Questions: ${interviewQuestions.join(
+            } questions. The last question includes a score placeholder. DO NOT REPEAT QUESTIONS. TAKE NOTE OF THE CONVERSATION AND DEDUCE A PERCENTAGE SCORE BASED ON THE USER'S RESPONSE TO ALL THE QUESTIONS. Questions: ${interviewQuestions.join(
               ", "
             )}`,
           },
