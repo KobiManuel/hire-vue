@@ -98,6 +98,8 @@ app.post("/login", async (req, res) => {
 
     const user = await User.findOne({ email });
 
+    let companyName = null;
+
     // Handle case where user is not found
     if (!user) {
       return res.status(401).send({ message: "User not found" });
@@ -108,8 +110,15 @@ app.post("/login", async (req, res) => {
     // Validate password
     if (isMatch) {
       const token = generateToken(user);
+
+      const organization = await Interview.findOne({ userId: user._id });
+
+      if (organization) {
+        companyName = organization.organizationName;
+      }
+
       // If everything is fine, send success response
-      res.status(200).send({ token, message: "Login successful" });
+      res.status(200).send({ token, companyName, message: "Login successful" });
     } else {
       return res.status(401).send({ message: "Incorrect password" });
     }

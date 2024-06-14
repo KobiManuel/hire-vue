@@ -46,10 +46,11 @@ const SignIn = () => {
       });
 
       if (response.ok) {
-        const { message, token } = await response?.json();
+        const { message, token, companyName } = await response?.json();
         handleToast(message, "Success");
         setLoading(false);
         localStorage.setItem("authToken", token);
+        localStorage.setItem("hireVueOrgName", companyName);
         navigate("/admin");
       } else {
         const { message } = await response?.json();
