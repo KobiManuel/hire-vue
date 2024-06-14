@@ -5,6 +5,7 @@ import copy from "../../assets/copy.svg";
 import tick from "../../assets/tick.svg";
 import Loader from "../../components/Icons/Loader";
 import Toast from "../../components/Toast/Toast";
+import { ResponsiveTable } from "responsive-table-react";
 
 const AdminPanel = () => {
   const [loading, setLoading] = useState(false);
@@ -14,6 +15,7 @@ const AdminPanel = () => {
   const [details, setDetails] = useState({
     nameValue: "",
     questionsValue: "",
+    candidates: [],
   });
   const [toastVisiblity, setToastVisibility] = useState({
     showToast: false,
@@ -28,12 +30,27 @@ const AdminPanel = () => {
 
   const organizationName = localStorage.getItem("hirevueOrgName");
 
+  const columns = [
+    {
+      id: "name",
+      text: "Name",
+    },
+    {
+      id: "email",
+      text: "Email",
+    },
+    {
+      id: "score",
+      text: "Score",
+    },
+  ];
+
   const currentUrl = window.location.origin;
   const interviewLink = `${currentUrl}/${organizationName}`;
 
   const { showToast, toastMessage, toastStatus } = toastVisiblity;
 
-  const { nameValue, questionsValue } = details;
+  const { nameValue, questionsValue, candidates } = details;
 
   const handleToast = (message, status) => {
     setToastVisibility({
@@ -193,6 +210,7 @@ const AdminPanel = () => {
           setDetails({
             nameValue: data.organizationName,
             questionsValue: data.interviewQuestions.join("\n"),
+            candidates: data.candidates,
           });
         } else {
           const { message } = await response?.json();
@@ -208,6 +226,12 @@ const AdminPanel = () => {
       fetchInterviewData();
     }
   }, [organizationName]);
+
+  const candidateData = candidates?.map((candidate) => ({
+    name: candidate.name,
+    email: candidate.email,
+    score: candidate.score,
+  }));
 
   return (
     <section className={styles.admin}>
@@ -271,6 +295,10 @@ const AdminPanel = () => {
         >
           {loading ? <Loader /> : "Submit"}
         </button>
+        <div className={styles.column}>
+          <label>Candidates Info</label>
+          <ResponsiveTable columns={columns} data={candidateData} />
+        </div>
       </div>
     </section>
   );

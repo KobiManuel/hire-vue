@@ -390,6 +390,7 @@ app.get(
       res.status(200).send({
         organizationName: interview.organizationName,
         interviewQuestions: interview.interviewQuestions,
+        candidates: interview.candidates,
       });
     } catch (error) {
       console.error("Error fetching interview questions:", error);
@@ -455,11 +456,9 @@ app.get("/validateLink/:organizationName", async (req, res) => {
 //   { role: "assistant", content: "follow the instructions" },
 // ];
 
-const interviewSessions = {};
-
 app.post("/", verifyToken, async (req, res) => {
   try {
-    const { prompt, organizationName, sessionId } = req.body;
+    const { prompt, organizationName } = req.body;
 
     // Fetch interview questions from the database (unchanged)
     const interview = await Interview.findOne({ organizationName });
@@ -471,11 +470,6 @@ app.post("/", verifyToken, async (req, res) => {
     }
 
     const interviewQuestions = interview.interviewQuestions;
-
-    // const interviewQuestions = [
-    //   ...initialInterviewQuestions,
-    //   "Thank you, this interview is now concluded. You have scored {something} percent",
-    // ];
 
     // Build conversation history with Gemini format
     const conversationHistory = [
@@ -495,7 +489,7 @@ app.post("/", verifyToken, async (req, res) => {
     ];
 
     // Choose a suitable Gemini model for chat-like interactions
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); // Replace with appropriate model if needed
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     // Start chat session with Gemini
     const chat = await model.startChat({

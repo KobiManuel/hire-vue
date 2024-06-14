@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@babel/runtime": "^7.24.7",
     "bcryptjs": "^2.4.3",
     "react-router-dom": "^6.16.0",
     "sass": "^1.68.0"

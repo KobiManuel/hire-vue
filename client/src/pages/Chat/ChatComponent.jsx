@@ -197,12 +197,8 @@ const ChatComponent = () => {
 
         if (
           chatMessages.filter((msg) => !msg.isAi).length ===
-          interviewQuestions.length - 1
+          interviewQuestions.length
         ) {
-          setIsLastQuestion(true);
-        }
-
-        if (isLastQuestion) {
           const score = Math.floor(Math.random() * 101);
           const finalMessage = `Thank you, this interview is now concluded. You have scored ${score} percent`;
 
@@ -235,6 +231,7 @@ const ChatComponent = () => {
           );
 
           if (updateResponse.ok) {
+            localStorage.removeItem("hireVueClientToken");
             setIsLoading((prevValues) => ({
               ...prevValues,
               requestLoading: false,
