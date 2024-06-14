@@ -87,6 +87,7 @@ const ChatComponent = () => {
   };
 
   useEffect(() => {
+    const orgName = localStorage.getItem("hireVueOrgName");
     // Fetch interview questions for the candidate's organization
     fetch(`https://hire-vue.onrender.com/get-interview-questions/${orgName}`, {
       headers: {
