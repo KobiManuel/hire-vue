@@ -21,6 +21,8 @@ const Signup = () => {
 
   const { showToast, toastMessage, toastStatus } = toastVisiblity;
 
+  const companyName = localStorage.getItem("hireVueOrgName");
+
   const navigate = useNavigate();
 
   const handleToast = (message, status) => {
@@ -48,6 +50,9 @@ const Signup = () => {
       if (response.ok) {
         const { message, token } = await response?.json();
         handleToast(message, "Success");
+        if (companyName) {
+          localStorage.removeItem("hireVueOrgName");
+        }
         setLoading(false);
         localStorage.setItem("authToken", token);
         navigate("/admin");
