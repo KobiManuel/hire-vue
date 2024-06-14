@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import bot from "../../assets/lunabot1.png";
+import logo from "../../assets/logo.png";
 import "./Header.scss";
 import AdminModal from "../Modal/AdminModal";
 import MenuIcon from "../MenuIcon/MenuIcon";
@@ -24,11 +24,17 @@ const Header = () => {
             <Link to="/" className="name-container">
               <p className="name">
                 {" "}
-                <div
-                  className="profile header-logo"
-                  style={{ background: "white" }}
-                >
-                  {/* <img src={bot} alt={"bot"} /> */}
+                <div className="profile header-logo">
+                  <img
+                    src={logo}
+                    alt={"bot"}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      borderRadius: "60%",
+                    }}
+                  />
                 </div>
                 HIREVUE
               </p>
