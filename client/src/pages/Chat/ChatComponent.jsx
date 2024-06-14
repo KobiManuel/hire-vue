@@ -88,7 +88,7 @@ const ChatComponent = () => {
 
   useEffect(() => {
     // Fetch interview questions for the candidate's organization
-    fetch(`http://localhost:5000/get-interview-questions/${orgName}`, {
+    fetch(`https://hire-vue.onrender.com/get-interview-questions/${orgName}`, {
       headers: {
         Authorization: `${token}`,
       },
@@ -174,7 +174,7 @@ const ChatComponent = () => {
     ]);
 
     try {
-      const response = await fetch("http://localhost:5000", {
+      const response = await fetch("https://hire-vue.onrender.com", {
         method: "POST",
         headers: {
           "Content-type": "application/json",
@@ -214,7 +214,7 @@ const ChatComponent = () => {
 
           // Send PATCH request to update candidate details
           const updateResponse = await fetch(
-            `http://localhost:5000/update-score`,
+            `https://hire-vue.onrender.com/update-score`,
             {
               method: "PATCH",
               headers: {

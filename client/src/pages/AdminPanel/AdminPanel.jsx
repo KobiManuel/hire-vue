@@ -89,7 +89,7 @@ const AdminPanel = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/interview-questions/${orgName}`,
+        `https://hire-vue.onrender.com/interview-questions/${orgName}`,
         {
           method: "POST",
           headers: {
@@ -143,7 +143,7 @@ const AdminPanel = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/interview-questions/${orgName}`,
+        `https://hire-vue.onrender.com/interview-questions/${orgName}`,
         {
           method: "PATCH",
           headers: {
@@ -193,7 +193,7 @@ const AdminPanel = () => {
 
       try {
         const response = await fetch(
-          `http://localhost:5000/interview-questions/${organizationName}`,
+          `https://hire-vue.onrender.com/interview-questions/${organizationName}`,
           {
             method: "GET",
             headers: {
