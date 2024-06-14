@@ -51,6 +51,14 @@ nav {
   display: flex;
   align-items: center;
   gap: 16px;
+  > a {
+    text-decoration: none;
+    color: white !important;
+    font-size: 14px;
+    @media screen and (max-width: 800px) {
+      display: none;
+    }
+  }
   > p {
     color: white;
     font-size: 14px;

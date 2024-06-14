@@ -41,7 +41,9 @@ const Header = () => {
             </Link>
             <span className="extra-nav-links">
               <p>Vetting Process</p>
-              <p>How it Works</p>
+              <Link to={"/how-it-works"}>
+                <p>How it Works</p>
+              </Link>
             </span>
           </figure>
           <div>
@@ -59,7 +61,7 @@ const Header = () => {
                   <Link to={"/"}>Vetting Process</Link>
                 </li>
                 <li>
-                  <Link to={"/"}>How it Works</Link>
+                  <Link to={"/how-it-works"}>How it Works</Link>
                 </li>
                 <li>
                   <Link to={"/signup"}>Admin</Link>

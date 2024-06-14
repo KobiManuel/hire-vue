@@ -7,6 +7,7 @@ import SignUp from "./pages/SignUp/Main";
 import SignIn from "./pages/SignIn/Main";
 import AdminPanel from "./pages/AdminPanel/AdminPanel";
 import SuccessPage from "./pages/SuccessPage/Main";
+import HowItWorks from "./pages/HowItWorks/Main";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="signin" element={<SignIn />} />
         <Route path="admin" element={<AdminPanel />} />
         <Route path="interview-done" element={<SuccessPage />} />
+        <Route path="how-it-works" element={<HowItWorks />} />
       </Routes>
     </>
   );

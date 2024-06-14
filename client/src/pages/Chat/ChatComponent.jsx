@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import bot from "../../assets/lunabot1.png";
 import user from "../../assets/user.png";
 import send from "../../assets/send.png";
 import "./ChatComponent.scss";
