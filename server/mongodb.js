@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 
 mongoose
   .connect(
-    "mongodb+srv://KobiManuel:doorknob91@cluster0.iabidqb.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+    `mongodb+srv://${process.env.MONGODB_USER}:${process.env.MONGODB_PASSWORD}@${process.env.MONGODB_CLUSTER}/?retryWrites=true&w=majority&appName=Cluster0`
   )
   .then(() => {
     console.log("mongodb connected");

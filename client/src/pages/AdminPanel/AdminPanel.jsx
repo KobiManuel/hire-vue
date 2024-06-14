@@ -104,8 +104,6 @@ const AdminPanel = () => {
         }
       );
 
-      console.log("response is", response);
-
       if (response.ok) {
         setLoading(false);
         localStorage.setItem("hirevueOrgName", orgName);
@@ -156,8 +154,6 @@ const AdminPanel = () => {
           }),
         }
       );
-
-      console.log("response is", response);
 
       if (response.ok) {
         setLoading(false);

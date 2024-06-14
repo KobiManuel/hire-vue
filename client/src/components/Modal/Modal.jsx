@@ -47,7 +47,6 @@ const Modal = ({ showModal, setShowModal }) => {
   };
 
   const handleToast = (message, status) => {
-    console.log("hittinggggg");
     setToastVisibility({
       showToast: true,
       toastMessage: message,
